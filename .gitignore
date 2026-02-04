@@ -1,2 +1,3 @@
 /traefik/certs/milkyway.crt
 /traefik/certs/milkyway.key
+/.env
