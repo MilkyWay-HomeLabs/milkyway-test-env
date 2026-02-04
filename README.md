@@ -87,9 +87,10 @@ graph TD
     - **Promtail**: Ships logs from Docker containers and system to Loki.
 - **Application Services**:
     - **Fileserver-test**: Nginx serving static resources.
-    - **Tomcat-test-andromeda**: Java application server running the Andromeda test app.
+    - **Tomcat-test-andromeda**: Java application server [Andromeda AuthorizationServer](https://github.com/MilkyWay-HomeLabs/andromeda-authorization-server-public). Communicates with the MariaDB database (`andromeda` database). CORS configuration is prepared for `dev`, `test`, and `prod` environments in the `milkyway` domain.
 - **Databases**:
-    - **MariaDB**, **PostgreSQL**, **MongoDB**: Test databases for applications.
+    - **MariaDB**: Main database for the Andromeda authorization server.
+    - **PostgreSQL**, **MongoDB**: Additional databases for testing purposes.
 
 ## Starting the Environment
 To start all services:
