@@ -1,0 +1,74 @@
+tls:
+  certificates:
+    - certFile: /certs/milkyway.crt
+      keyFile: /certs/milkyway.key
+
+http:
+  routers:
+    dashboard:
+      rule: Host(`traefik.test.milkyway`)
+      entryPoints:
+        - https
+      service: api@internal
+      tls: { }
+
+    prometheus:
+      rule: Host(`prometheus.test.milkyway`)
+      entryPoints:
+        - https
+      service: prometheus-svc
+      tls: { }
+
+    grafana:
+      rule: Host(`grafana.test.milkyway`)
+      entryPoints:
+        - https
+      service: grafana-svc
+      tls: { }
+
+    resources:
+      rule: Host(`resources.test.milkyway`)
+      entryPoints:
+        - https
+      service: resources-svc
+      tls: { }
+
+    andromeda-dev:
+      rule: "Host(`andromeda.dev.milkyway`) && PathPrefix(`/api`)"
+      entryPoints:
+        - https
+      service: andromeda-dev-svc
+      tls: { }
+
+    andromeda-test:
+      rule: "Host(`andromeda.test.milkyway`) && PathPrefix(`/api`)"
+      entryPoints:
+        - https
+      service: andromeda-test-svc
+      tls: { }
+
+  services:
+    resources-svc:
+      loadBalancer:
+        servers:
+          - url: "http://fileserver-test:80"
+
+    prometheus-svc:
+      loadBalancer:
+        servers:
+          - url: "http://prometheus:9090"
+
+    grafana-svc:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+
+    andromeda-dev-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8444"
+
+    andromeda-test-svc:
+      loadBalancer:
+        servers:
+          - url: "http://tomcat-test-andromeda:8080"
