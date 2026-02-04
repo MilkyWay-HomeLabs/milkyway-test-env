@@ -1,4 +1,5 @@
 # MilkyWay Home Lab - Test Environment
+**Version: 1.0.0**
 
 This repository contains the test environment configuration for the MilkyWay project, based on Docker Compose.
 
@@ -9,6 +10,7 @@ This repository contains the test environment configuration for the MilkyWay pro
 4. [Environment Configuration](#environment-configuration)
 5. [Architecture and Containers](#architecture-and-containers)
 6. [Starting the Environment](#starting-the-environment)
+7. [License and Author](#license-and-author)
 
 ## Prerequisites
 - Docker and Docker Compose installed.
@@ -98,3 +100,7 @@ To start all services:
 docker compose up -d
 ```
 The Traefik dashboard will be available at [https://traefik.test.milkyway](https://traefik.test.milkyway).
+
+## License and Author
+- **Author**: Szymon Derleta
+- **License**: [Apache License 2.0](LICENSE)
