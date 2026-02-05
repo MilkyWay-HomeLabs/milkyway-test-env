@@ -1,0 +1,13 @@
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (2, 2, 2);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (3, 3, 3);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (4, 4, 4);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (5, 5, 5);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (7, 7, 7);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (9, 9, 9);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (10, 10, 10);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (11, 11, 11);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (12, 12, 12);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (13, 13, 13);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (14, 14, 188);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (15, 15, 15);
+INSERT INTO test_nebula.user_settings (user_id, general_id, sound_id) VALUES (1000011, 1000011, 1000011);
