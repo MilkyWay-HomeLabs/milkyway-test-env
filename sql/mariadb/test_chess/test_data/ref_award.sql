@@ -1,0 +1,10 @@
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (1, 'MVP', 'Best player in season ranking');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (2, 'Consequencer', 'Most wins in a row');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (3, 'Total Winner', 'Most total wins');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (4, 'Trophier', 'Most medals earned (medals count, then values as 3-gold, 2-silver, 1-broneze, then ranking)');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (5, 'Ratiolation', 'Best wins/lose ratio');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (6, 'Battler', 'Most games played');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (7, 'Unbeatable', 'Hardest to beat, less loses in season');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (8, 'Hardbreaker', 'Most wins played as black color');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (9, 'Checkmatter', 'Most checkmates');
+INSERT INTO test_chess.ref_award (id, name, description) VALUES (10, 'Swisterland', 'Most wins in swiss tournaments');
