@@ -46,7 +46,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 Copy the `.env.example` file to `.env` and fill in the required variables (e.g., Traefik dashboard password).
 
 ```bash
-cp .env.example .env
+cp .env.example.example .env.example
 ```
 
 ## Architecture and Containers
