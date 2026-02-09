@@ -1,0 +1,15 @@
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (11, 1, 3523, 2, 123);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (11, 2, 2211, 1, 234);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (11, 3, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (11, 4, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (11, 5, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (13, 1, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (13, 2, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (13, 3, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (13, 4, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (13, 5, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (14, 1, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (14, 2, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (14, 3, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (14, 4, 0, 0, 0);
+INSERT INTO test_nebula.user_achievements (user_id, achievement_id, progress, level, value) VALUES (14, 5, 0, 0, 0);

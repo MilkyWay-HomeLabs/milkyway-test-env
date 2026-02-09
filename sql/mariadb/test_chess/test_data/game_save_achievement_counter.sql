@@ -1,0 +1,3 @@
+INSERT INTO test_chess.game_save_achievement_counter (achievement_id, game_save_id, value, created_at, updated_at) VALUES (1, '123e4567-e89b-12d3-a456-426614174000', 2, '2025-08-15 11:59:57', '2025-08-15 11:59:57');
+INSERT INTO test_chess.game_save_achievement_counter (achievement_id, game_save_id, value, created_at, updated_at) VALUES (2, '123e4567-e89b-12d3-a456-426614174000', 5, '2025-08-15 11:59:57', '2025-08-15 11:59:57');
+INSERT INTO test_chess.game_save_achievement_counter (achievement_id, game_save_id, value, created_at, updated_at) VALUES (56, '123e4567-e89b-12d3-a456-426614174000', 3, '2025-08-15 11:59:57', '2025-08-15 11:59:57');

@@ -1,0 +1,10 @@
+/traefik/certs/milkyway.crt
+/traefik/certs/milkyway.key
+/.env
+/sql/mariadb/test_chess/chess_v1/
+/env/tomcat/andromeda-authorization.properties
+/env/grafana/.env
+/env/db/mariadb.env
+/env/db/mongo.env
+/env/db/postgres.env
+/.idea/

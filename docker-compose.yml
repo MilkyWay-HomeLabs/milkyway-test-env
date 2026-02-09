@@ -1,0 +1,201 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - "no-new-privileges:true"
+    networks:
+      - proxy
+      - internal
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/config:/config:ro
+      - ./traefik/certs:/certs:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.test.milkyway`)"
+      - "traefik.http.routers.dashboard.entrypoints=https"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    networks:
+      - internal
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: grafana
+    restart: unless-stopped
+    env_file:
+      - env/monitoring/grafana.env
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - internal
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: host
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "9100:9100"
+    networks:
+      - internal
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    restart: unless-stopped
+    command: [ "-config.file=/etc/loki/config.yml" ]
+    volumes:
+      - ./loki/config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - internal
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: promtail
+    restart: unless-stopped
+    command: [ "-config.file=/etc/promtail/config.yml" ]
+    volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - promtail-positions:/tmp
+    networks:
+      - internal
+
+  fileserver-test:
+    image: nginx:alpine
+    container_name: fileserver-test
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - ../../../resources/test:/usr/share/nginx/html:ro
+      - ./fileserver-test/nginx.conf:/etc/nginx/nginx.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fileserver-test.rule=Host(`resources.test.milkyway`)"
+      - "traefik.http.routers.fileserver-test.entrypoints=http"
+      - "traefik.http.routers.fileserver-test.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.fileserver-test-secure.rule=Host(`resources.test.milkyway`)"
+      - "traefik.http.routers.fileserver-test-secure.entrypoints=https"
+      - "traefik.http.routers.fileserver-test-secure.tls=true"
+      - "traefik.http.services.fileserver-test.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+
+  mariadb-test:
+    image: mariadb:11
+    container_name: milky-test-mariadb
+    restart: unless-stopped
+    env_file:
+      - env/db/mariadb.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./sql/mariadb:/docker-entrypoint-initdb.d:ro
+    networks:
+      - internal
+
+  postgres-test:
+    image: postgres:16
+    container_name: milky-test-postgres
+    restart: unless-stopped
+    env_file:
+      - env/db/postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/postgres:/docker-entrypoint-initdb.d:ro
+    networks:
+      - internal
+
+  mongo-test:
+    image: mongo:8
+    container_name: milky-test-mongo
+    restart: unless-stopped
+    env_file:
+      - env/db/mongo.env
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./sql/mongo:/docker-entrypoint-initdb.d:ro
+    networks:
+      - internal
+
+  tomcat-test-andromeda:
+    image: tomcat:10.1-jdk21-temurin
+    container_name: tomcat-test-andromeda
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/tomcat.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    volumes:
+      - ./tomcat/app/andromeda-authorization-server##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/andromeda/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/andromeda-authorization.properties:/usr/local/tomcat/conf/andromeda-authorization.properties:ro
+    networks:
+      - proxy
+      - internal
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+  promtail-positions:
+    driver: local
+  mariadb-data:
+    driver: local
+  postgres-data:
+    driver: local
+  mongo-data:
+    driver: local
+
+networks:
+  proxy:
+    name: proxy
+    driver: bridge
+  internal:
+    name: internal
+    driver: bridge

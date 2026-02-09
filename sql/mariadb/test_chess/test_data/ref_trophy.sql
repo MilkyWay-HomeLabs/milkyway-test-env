@@ -1,0 +1,12 @@
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (1, 'League Trophy', 'Trophy for best league player');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (2, 'Derby Trophy', 'Trophy for best derby player');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (3, 'World Cup Trophy', 'Trophy for world champion');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (4, 'Continental Trophy', 'Trophy for continental champion');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (5, 'Swiss National Trophy', 'Trophy for national swiss winner');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (6, 'Swiss Continental Trophy', 'Trophy for continental swiss winner');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (7, 'Swiss World Trophy', 'Trophy for world swiss winner');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (8, 'Swiss Random Trophy', 'Trophy for random swiss winner');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (9, 'Cup of Nations Trophy', 'Trophy for winner Cup of Nations');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (10, 'Winners Trophy', 'Trophy for best player in Winners Cup');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (11, 'Fourth Trophy', 'Trophy for winner Fourth Challenge');
+INSERT INTO test_chess.ref_trophy (id, name, description) VALUES (12, 'MASTERS Trophy', 'Trophy for winner MASTERS');

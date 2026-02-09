@@ -1,0 +1,25 @@
+api:
+  dashboard: true
+
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+          permanent: true
+
+  https:
+    address: ":443"
+
+log:
+  level: DEBUG
+
+accessLog: { }
+
+providers:
+  file:
+    directory: /config
+    watch: true

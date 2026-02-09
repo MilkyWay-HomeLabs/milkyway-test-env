@@ -1,0 +1,17 @@
+INSERT INTO test_nebula.themes (id, name) VALUES (1, 'Fire');
+INSERT INTO test_nebula.themes (id, name) VALUES (2, 'Atom');
+INSERT INTO test_nebula.themes (id, name) VALUES (3, 'Water');
+INSERT INTO test_nebula.themes (id, name) VALUES (4, 'Ice');
+INSERT INTO test_nebula.themes (id, name) VALUES (5, 'Earth');
+INSERT INTO test_nebula.themes (id, name) VALUES (6, 'Gravity');
+INSERT INTO test_nebula.themes (id, name) VALUES (7, 'Wind');
+INSERT INTO test_nebula.themes (id, name) VALUES (8, 'Sonic');
+INSERT INTO test_nebula.themes (id, name) VALUES (9, 'Thunder');
+INSERT INTO test_nebula.themes (id, name) VALUES (10, 'Electro');
+INSERT INTO test_nebula.themes (id, name) VALUES (11, 'Poison');
+INSERT INTO test_nebula.themes (id, name) VALUES (12, 'Virus');
+INSERT INTO test_nebula.themes (id, name) VALUES (13, 'Ki');
+INSERT INTO test_nebula.themes (id, name) VALUES (14, 'Holy');
+INSERT INTO test_nebula.themes (id, name) VALUES (15, 'Dark');
+INSERT INTO test_nebula.themes (id, name) VALUES (16, 'Umbra');
+INSERT INTO test_nebula.themes (id, name) VALUES (17, 'Default');

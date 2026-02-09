@@ -1,0 +1,10 @@
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (1, 'General', 'General achievements covering a wide range of chess player activities');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (2, 'Matches', 'Achievements related to the number of matches played');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (3, 'Wins', 'Achievements related to winning matches. Showcase your victories and strategic skills.');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (4, 'Trophies', 'Achievements related to earning trophies in tournaments and other events. Your greatest successes.');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (5, 'Awards', 'Achievements honoring awards and distinctions earned for outstanding performance or progress.');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (6, 'Seasons', 'Achievements measuring your progress in various chess seasons');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (7, 'Moves', 'Achievements related to the number of moves made. Analyze your decisions and refine your strategy.');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (8, 'Captures', 'Achievements concerning the number of opponent\'s pieces captured');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (9, 'Ranking', 'Achievements related to chess ranking and ELO score. Your standing in the chess world.');
+INSERT INTO test_chess.ref_achievement_type (id, name, description) VALUES (10, 'Time', 'Achievements measuring the time spent playing chess. Showing your perseverance and commitment.');

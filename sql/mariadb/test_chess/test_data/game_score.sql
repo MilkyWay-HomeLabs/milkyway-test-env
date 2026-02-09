@@ -1,0 +1,2 @@
+INSERT INTO test_chess.game_score (game_id, player_id, is_white, type_id, result_id, points, created_at) VALUES ('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', '713e4567-e89b-12d3-a456-426614174000', 1, 1, 1, 1.0, '2025-07-24 18:40:51');
+INSERT INTO test_chess.game_score (game_id, player_id, is_white, type_id, result_id, points, created_at) VALUES ('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', '723e4567-e89b-12d3-a456-426614174000', 0, 1, 1, 0.0, '2025-07-24 18:40:53');

@@ -1,0 +1,1 @@
+INSERT INTO test_chess.settings_keypass (id, game_save_id, keypass, is_active, created_at, updated_at) VALUES ('55fe14d4-36ca-491f-bfb3-016c75c70559', '123e4567-e89b-12d3-a456-426614174000', 1, 1, '2025-07-27 08:49:15', '2025-07-27 08:49:15');
