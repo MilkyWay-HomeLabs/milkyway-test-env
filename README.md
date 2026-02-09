@@ -94,8 +94,6 @@ graph TD
     Traefik -->|Routing| Prometheus
 
     Tomcat --> MariaDB
-    Tomcat --> Postgres
-    Tomcat --> Mongo
 
     Prometheus -->|Scrape| NodeExporter
     Promtail -->|Collect Logs| Loki
@@ -103,10 +101,10 @@ graph TD
     Grafana -->|Query| Loki
 
     %% Styling
-    classDef proxy fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef app fill:#bbf,stroke:#333,stroke-width:1px;
-    classDef db fill:#bfb,stroke:#333,stroke-width:1px;
-    classDef monitor fill:#fbb,stroke:#333,stroke-width:1px;
+    classDef proxy fill:#f9f,stroke:#333,stroke-width:2px,color:#000;
+    classDef app fill:#bbf,stroke:#333,stroke-width:1px,color:#000;
+    classDef db fill:#bfb,stroke:#333,stroke-width:1px,color:#000;
+    classDef monitor fill:#fbb,stroke:#333,stroke-width:1px,color:#000;
 
     class Traefik proxy;
     class Tomcat,Fileserver,AndromedaDev app;
