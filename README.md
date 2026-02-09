@@ -96,6 +96,7 @@ graph TD
     Tomcat --> MariaDB
 
     Prometheus -->|Scrape| NodeExporter
+    Prometheus -->|Scrape| Tomcat
     Promtail -->|Collect Logs| Loki
     Grafana -->|Query| Prometheus
     Grafana -->|Query| Loki
