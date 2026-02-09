@@ -55,29 +55,63 @@ Detailed technical specification of containers, networks, and endpoints can be f
 ### Container Diagram
 ```mermaid
 graph TD
-    User([User / Browser]) -->|Port 80/443| Traefik[Traefik Proxy]
+    %% User Access
+    User([fa:fa-user User / Browser]) -->|HTTPS 443| Traefik
 
-    subgraph "Proxy Network"
-        Traefik --> Fileserver[Fileserver Test - Nginx]
-        Traefik --> Tomcat[Tomcat - Andromeda Test]
-        Traefik --> AndromedaDev[Andromeda Dev - External/Host]
+    %% Main Proxy Component
+    subgraph ProxyLayer ["fa:fa-shield-halved Edge Proxy & Routing"]
+        Traefik[fa:fa-route Traefik Proxy]
     end
 
-    subgraph "Internal Network"
-        Traefik --> Prometheus[Prometheus]
-        Traefik --> Grafana[Grafana]
-        
-        Prometheus --> NodeExporter[Node Exporter]
-        Prometheus --> Promtail[Promtail]
-        
-        Promtail --> Loki[Loki]
-        Grafana --> Prometheus
-        Grafana --> Loki
-
-        Tomcat --> MariaDB[(MariaDB)]
-        Tomcat --> Postgres[(PostgreSQL)]
-        Tomcat --> Mongo[(MongoDB)]
+    %% Applications Layer
+    subgraph AppLayer ["fa:fa-gears Applications"]
+        Tomcat[fa:fa-code Tomcat - Andromeda]
+        Fileserver[fa:fa-file-code Fileserver - Nginx]
+        AndromedaDev[fa:fa-flask Andromeda Dev]
     end
+
+    %% Databases Layer
+    subgraph DBLayer ["fa:fa-database Storage"]
+        MariaDB[(fa:fa-database MariaDB)]
+        Postgres[(fa:fa-database PostgreSQL)]
+        Mongo[(fa:fa-database MongoDB)]
+    end
+
+    %% Monitoring Stack
+    subgraph MonitoringLayer ["fa:fa-chart-line Monitoring & Observability"]
+        Grafana[fa:fa-chart-column Grafana]
+        Prometheus[fa:fa-gauge-high Prometheus]
+        Loki[fa:fa-list-check Loki]
+        NodeExporter[fa:fa-microchip Node Exporter]
+        Promtail[fa:fa-conveyor-belt Promtail]
+    end
+
+    %% Connections
+    Traefik -->|Routing| Tomcat
+    Traefik -->|Routing| Fileserver
+    Traefik -->|Routing| AndromedaDev
+    Traefik -->|Routing| Grafana
+    Traefik -->|Routing| Prometheus
+
+    Tomcat --> MariaDB
+    Tomcat --> Postgres
+    Tomcat --> Mongo
+
+    Prometheus -->|Scrape| NodeExporter
+    Promtail -->|Collect Logs| Loki
+    Grafana -->|Query| Prometheus
+    Grafana -->|Query| Loki
+
+    %% Styling
+    classDef proxy fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef app fill:#bbf,stroke:#333,stroke-width:1px;
+    classDef db fill:#bfb,stroke:#333,stroke-width:1px;
+    classDef monitor fill:#fbb,stroke:#333,stroke-width:1px;
+
+    class Traefik proxy;
+    class Tomcat,Fileserver,AndromedaDev app;
+    class MariaDB,Postgres,Mongo db;
+    class Grafana,Prometheus,Loki,NodeExporter,Promtail monitor;
 ```
 
 ## Starting the Environment
