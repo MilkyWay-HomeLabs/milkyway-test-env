@@ -31,7 +31,7 @@ Two main networks are defined in the system:
 ### 2. Applications and Servers
 | Container | Image | Networks | Ports (Host) | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **tomcat-test-andromeda** | `tomcat:10.1-jdk21` | `proxy`, `internal` | - | Andromeda application server ([Andromeda Authorization Server](https://github.com/MilkyWay-HomeLabs/andromeda-authorization-server-public)). |
+| **tomcat-test-andromeda** | `tomcat:10.1-jdk21` | `proxy`, `internal` | - | Andromeda application server ([Andromeda Authorization Server](https://github.com/MilkyWay-HomeLabs/andromeda-authorization-server-public)). Exposes Prometheus metrics at `/api/actuator/prometheus`. |
 | **fileserver-test** | `nginx:alpine` | `proxy` | - | Static file server for test resources. |
 
 ### 3. Monitoring and Logs
