@@ -3,6 +3,13 @@
 ## Overview
 The backup container performs database dumps for MariaDB, PostgreSQL, and MongoDB. These dumps are saved in the `/backups` directory (mapped to the host's `./backups` directory).
 
+## Features
+- **Automated Database Dumps**: MariaDB, PostgreSQL, and MongoDB.
+- **Weekly Catch-up**: Runs a backup automatically on container start if one hasn't been performed yet during the current week (useful for test environments that are not always running).
+- **Cron-based Scheduling**: Default schedule is daily at 03:00 AM (`0 3 * * *`).
+- **Retention Policy**: Automatically rotates old backups based on `KEEP_DAYS`.
+- **Restic Integration**: Optional offsite, encrypted backups.
+
 ## Main Components
 - `Dockerfile`: Defines the backup container image.
 - `entrypoint.sh`: Sets up the cron job and starts the `cron` daemon in the foreground.
@@ -33,6 +40,9 @@ You can trigger a backup manually without waiting for the cron job:
 ```bash
 docker compose exec backup-test /usr/local/bin/run_backups.sh
 ```
+
+### Weekly Catch-up Backup
+Since test environments are often powered off, the `entrypoint.sh` includes a mechanism to ensure at least one backup is performed per week. On container startup, it checks if a backup has already been run in the current week (using a stamp file in the backup directory). If not, it triggers `run_backups.sh` immediately.
 
 ## Restoration Guide
 - **MariaDB**: `gunzip -c file.sql.gz | mysql -uUSER -pPASSWORD DB`

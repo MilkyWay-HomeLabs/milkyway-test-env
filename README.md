@@ -124,6 +124,7 @@ The environment includes an automated backup service (`backup-test`) that perfor
 
 - **Backup Location**: Backups are stored in the `./backups` directory on the host.
 - **Retention**: Old backups are automatically rotated.
+- **Weekly Catch-up**: Since the test environment is not always on, a backup is automatically triggered on container start if one hasn't been run yet during the current week.
 - **Manual Trigger**:
   ```bash
   docker compose exec backup-test /usr/local/bin/run_backups.sh

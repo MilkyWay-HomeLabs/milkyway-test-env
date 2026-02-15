@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Integrated backup service (`backup-test`) for automated database dumps (MariaDB, PostgreSQL, MongoDB).
+- **Weekly "catch-up" backup**: The service now automatically triggers a backup on container start if it's the first run of the week. This ensures data safety even if the test environment is not running 24/7.
 - Support for encrypted offsite backups using Restic.
 - Automated backup rotation and retention policy.
 - Detailed documentation for backup configuration and restoration in `backup/README.md`.
