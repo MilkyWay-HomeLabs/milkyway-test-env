@@ -216,7 +216,7 @@ services:
       - internal
 
   nebula-front-app-test:
-    build: ./nebula-front-app
+    build: ./nginx/nebula-front-app
     image: milkyway/nebula-front-app-test:local
     container_name: nebula-front-app-test
     restart: unless-stopped
