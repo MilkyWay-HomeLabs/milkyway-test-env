@@ -8,3 +8,5 @@
 /env/db/mongo.env
 /env/db/postgres.env
 /.idea/
+/env/backup/.env
+/env/backup/restic.env

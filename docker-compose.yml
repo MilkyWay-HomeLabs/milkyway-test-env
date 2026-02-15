@@ -49,7 +49,7 @@ services:
     container_name: grafana
     restart: unless-stopped
     env_file:
-      - env/monitoring/grafana.env
+      - env/grafana/.env
     volumes:
       - grafana-data:/var/lib/grafana
     ports:
@@ -117,6 +117,27 @@ services:
       - "traefik.http.routers.fileserver-test-secure.tls=true"
       - "traefik.http.services.fileserver-test.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy"
+
+  backup-test:
+    build: ./backup
+    image: milkyway/backup-test:local
+    container_name: backup-test
+    restart: unless-stopped
+    depends_on:
+      - mariadb-test
+      - postgres-test
+      - mongo-test
+    volumes:
+      - ./backups:/backups
+      - ./backup/logs:/var/log/mw-backup
+    env_file:
+      - ./env/db/mariadb.env
+      - ./env/db/postgres.env
+      - ./env/db/mongo.env
+      - ./env/backup/.env
+      - ./env/backup/restic.env
+    networks:
+      - internal
 
   mariadb-test:
     image: mariadb:11
