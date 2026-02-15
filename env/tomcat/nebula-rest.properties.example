@@ -1,0 +1,9 @@
+ANDROMEDA_AUTH_SERV_TEST_URL=https://andromeda.test.milkyway
+APP_JWT_SECRET=your_secret_jwt
+HEADER_FOR_AUTH_SERVER=nebula_rest_api
+NEBULA_TEST_DB_URL=jdbc:mariadb://mariadb-test:3306/test_nebula
+NEBULA_TEST_PASSWORD=password_for_test_nebula_scheme
+NEBULA_TEST_USERNAME=nebula
+SPRING_SECURITY_PASSWORD=your_spring_security_password
+SPRING_SECURITY_USERNAME=nebula
+USER_AVATAR_UPLOAD_TEST_PATH=/var/www/html/user/avatar

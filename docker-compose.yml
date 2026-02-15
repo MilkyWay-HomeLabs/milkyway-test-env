@@ -197,6 +197,22 @@ services:
       - proxy
       - internal
 
+  tomcat-test-nebula:
+    image: tomcat:10.1-jdk21-temurin
+    container_name: tomcat-test-nebula
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    volumes:
+      - ./tomcat/app/nebula-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/nebula/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/nebula-rest.properties:/usr/local/tomcat/conf/nebula-rest.properties:ro
+    networks:
+      - proxy
+      - internal
+
 volumes:
   prometheus-data:
     driver: local

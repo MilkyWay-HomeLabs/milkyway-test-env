@@ -47,6 +47,20 @@ http:
       service: andromeda-test-svc
       tls: { }
 
+    nebula-dev:
+      rule: "Host(`nebula.dev.milkyway`) && PathPrefix(`/api`)"
+      entryPoints:
+        - https
+      service: nebula-dev-svc
+      tls: { }
+
+    nebula-test:
+      rule: "Host(`nebula.test.milkyway`) && PathPrefix(`/api`)"
+      entryPoints:
+        - https
+      service: nebula-test-svc
+      tls: { }
+
   services:
     resources-svc:
       loadBalancer:
@@ -72,3 +86,13 @@ http:
       loadBalancer:
         servers:
           - url: "http://tomcat-test-andromeda:8080"
+
+    nebula-dev-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8445"
+
+    nebula-test-svc:
+      loadBalancer:
+        servers:
+          - url: "http://tomcat-test-nebula:8080"

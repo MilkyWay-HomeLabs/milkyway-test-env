@@ -10,3 +10,5 @@
 /.idea/
 /env/backup/.env
 /env/backup/restic.env
+/env/tomcat/nebula-rest.properties
+/env/tomcat/.env
