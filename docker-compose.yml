@@ -186,7 +186,7 @@ services:
     container_name: tomcat-test-andromeda
     restart: unless-stopped
     env_file:
-      - env/tomcat/tomcat.env
+      - env/tomcat/.env
     environment:
       - JAVA_OPTS=-Xms512m -Xmx1g
     volumes:
