@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-02-15
+
+### Added
+- Integrated **Nebula** application components into the test environment.
+- Added `tomcat-test-nebula` container for the Nebula REST API.
+- Added `nebula-front-app-test` container (Nginx) for the Nebula frontend application.
+- Configured Traefik routing for Nebula (test and dev environments) in `dynamic.yml`.
+- Updated system architecture diagram to include Nebula components.
+
 ## [1.1.0] - 2026-02-15
 
 ### Added

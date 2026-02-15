@@ -32,6 +32,8 @@ Two main networks are defined in the system:
 | Container | Image | Networks | Ports (Host) | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **tomcat-test-andromeda** | `tomcat:10.1-jdk21` | `proxy`, `internal` | - | Andromeda application server ([Andromeda Authorization Server](https://github.com/MilkyWay-HomeLabs/andromeda-authorization-server-public)). Exposes Prometheus metrics at `/api/actuator/prometheus`. |
+| **tomcat-test-nebula** | `tomcat:10.1-jdk21` | `proxy`, `internal` | - | Nebula REST API application server. |
+| **nebula-front-app-test** | `milkyway/nebula-front-app-test:local` | `proxy` | - | Nebula frontend application (React built & served by Nginx). |
 | **fileserver-test** | `nginx:alpine` | `proxy` | - | Static file server for test resources. |
 
 ### 3. Monitoring and Logs
@@ -61,6 +63,8 @@ Accessible via domain addresses (requires entries in `/etc/hosts` or DNS). All H
 | :--- | :--- | :--- | :--- |
 | **Traefik Dashboard** | `https://traefik.test.milkyway` | External | Basic Auth |
 | **Andromeda API** | `https://andromeda.test.milkyway/api` | External | App-dependent |
+| **Nebula API** | `https://nebula.test.milkyway/api` | External | App-dependent |
+| **Nebula Frontend** | `https://nebula.test.milkyway/home` | External | None (Login Required) |
 | **Grafana** | `https://grafana.test.milkyway` | External | Grafana Login |
 | **Prometheus** | `https://prometheus.test.milkyway` | External | None (Public within test network) |
 | **File Server** | `https://resources.test.milkyway` | External | None (Public) |
@@ -75,6 +79,8 @@ Accessible only to other containers within the same Docker network.
 | **MongoDB** | `mongo-test:27017` | `internal` |
 | **Loki** | `loki:3100` | `internal` |
 | **Tomcat (Andromeda)** | `tomcat-test-andromeda:8080` | `internal`/`proxy` |
+| **Tomcat (Nebula)** | `tomcat-test-nebula:8080` | `internal`/`proxy` |
+| **Nebula Front** | `nebula-front-app-test:80` | `proxy` |
 
 ---
 
@@ -87,4 +93,4 @@ The system uses Docker volumes to ensure data persistence:
 - `grafana-data`: Grafana configuration and databases.
 - `loki-data`: Stored logs.
 
-Database initialization scripts are located in the `./sql` directory and are mounted to the respective containers in Read-Only mode.
+Database initialization scripts are located in the `../sql` directory and are mounted to the respective containers in Read-Only mode.

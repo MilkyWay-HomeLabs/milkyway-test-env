@@ -1,5 +1,5 @@
 # MilkyWay Home Lab - Test Environment
-**Version: 1.1.0**
+**Version: 1.2.0**
 
 This repository contains the test environment configuration for the MilkyWay project, based on Docker Compose.
 
@@ -28,6 +28,8 @@ To access the services using their domain names, add the following entries to yo
 127.0.0.1   resources.test.milkyway
 127.0.0.1   andromeda.test.milkyway
 127.0.0.1   andromeda.dev.milkyway
+127.0.0.1   nebula.test.milkyway
+127.0.0.1   nebula.dev.milkyway
 ```
 
 ## TLS Certificates
@@ -51,8 +53,11 @@ Copy the `.env.example` file to `.env` and fill in the required variables (e.g.,
 cp .env.example .env
 ```
 
-## Architecture and Containers
-Detailed technical specification of containers, networks, and endpoints can be found in [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md).
+## Documentation and Architecture
+Więcej szczegółów technicznych znajduje się w katalogu [docs/](docs/).
+
+### Architecture and Containers
+Detailed technical specification of containers, networks, and endpoints can be found in [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md).
 
 ### Container Diagram
 ```mermaid
@@ -67,7 +72,9 @@ graph TD
 
     %% Applications Layer
     subgraph AppLayer ["fa:fa-gears Applications"]
-        Tomcat[fa:fa-code Tomcat - Andromeda]
+        TomcatAndromeda[fa:fa-code Tomcat - Andromeda]
+        TomcatNebula[fa:fa-code Tomcat - Nebula]
+        NebulaFront[fa:fa-desktop Nebula Frontend]
         Fileserver[fa:fa-file-code Fileserver - Nginx]
         AndromedaDev[fa:fa-flask Andromeda Dev]
     end
@@ -89,16 +96,20 @@ graph TD
     end
 
     %% Connections
-    Traefik -->|Routing| Tomcat
+    Traefik -->|Routing| TomcatAndromeda
+    Traefik -->|Routing| TomcatNebula
+    Traefik -->|Routing| NebulaFront
     Traefik -->|Routing| Fileserver
     Traefik -->|Routing| AndromedaDev
     Traefik -->|Routing| Grafana
     Traefik -->|Routing| Prometheus
 
-    Tomcat --> MariaDB
+    TomcatAndromeda --> MariaDB
+    TomcatNebula --> MariaDB
 
     Prometheus -->|Scrape| NodeExporter
-    Prometheus -->|Scrape| Tomcat
+    Prometheus -->|Scrape| TomcatAndromeda
+    Prometheus -->|Scrape| TomcatNebula
     Promtail -->|Collect Logs| Loki
     Grafana -->|Query| Prometheus
     Grafana -->|Query| Loki
@@ -114,7 +125,7 @@ graph TD
     classDef monitor fill:#fbb,stroke:#333,stroke-width:1px,color:#000;
 
     class Traefik proxy;
-    class Tomcat,Fileserver,AndromedaDev app;
+    class TomcatAndromeda,TomcatNebula,NebulaFront,Fileserver,AndromedaDev app;
     class MariaDB,Postgres,Mongo db;
     class Grafana,Prometheus,Loki,NodeExporter,Promtail monitor;
 ```
@@ -129,10 +140,10 @@ The environment includes an automated backup service (`backup-test`) that perfor
   ```bash
   docker compose exec backup-test /usr/local/bin/run_backups.sh
   ```
-For detailed configuration and restoration instructions, see [backup/README.md](backup/README.md).
+For detailed configuration and restoration instructions, see [docs/BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md).
 
 ## Changelog
-Detailed history of changes can be found in [CHANGELOG.md](CHANGELOG.md).
+Detailed history of changes can be found in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ## Starting the Environment
 To start all services:
