@@ -118,6 +118,8 @@ services:
       - "traefik.http.services.fileserver-test.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy"
 
+
+
   backup-test:
     build: ./backup
     image: milkyway/backup-test:local
@@ -212,6 +214,14 @@ services:
     networks:
       - proxy
       - internal
+
+  nebula-front-app-test:
+    build: ./nebula-front-app
+    image: milkyway/nebula-front-app-test:local
+    container_name: nebula-front-app-test
+    restart: unless-stopped
+    networks:
+      - proxy
 
 volumes:
   prometheus-data:

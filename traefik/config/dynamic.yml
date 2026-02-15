@@ -61,6 +61,20 @@ http:
       service: nebula-test-svc
       tls: { }
 
+    nebula-front-dev:
+      rule: "Host(`nebula.dev.milkyway`) && PathPrefix(`/home`)"
+      entryPoints:
+        - https
+      service: nebula-front-dev-svc
+      tls: { }
+
+    nebula-front-test:
+      rule: "Host(`nebula.test.milkyway`) && PathPrefix(`/home`)"
+      entryPoints:
+        - https
+      service: nebula-front-test-svc
+      tls: { }
+
   services:
     resources-svc:
       loadBalancer:
@@ -96,3 +110,13 @@ http:
       loadBalancer:
         servers:
           - url: "http://tomcat-test-nebula:8080"
+
+    nebula-front-dev-svc:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:3000"
+
+    nebula-front-test-svc:
+      loadBalancer:
+        servers:
+          - url: "http://nebula-front-app-test:80"
