@@ -62,14 +62,14 @@ http:
       tls: { }
 
     nebula-front-dev:
-      rule: "Host(`nebula.dev.milkyway`) && PathPrefix(`/home`)"
+      rule: "Host(`nebula.dev.milkyway`) && (PathPrefix(`/home`) || PathPrefix(`/nebula/app`))"
       entryPoints:
         - https
       service: nebula-front-dev-svc
       tls: { }
 
     nebula-front-test:
-      rule: "Host(`nebula.test.milkyway`) && PathPrefix(`/home`)"
+      rule: "Host(`nebula.test.milkyway`) && (PathPrefix(`/home`) || PathPrefix(`/nebula/app`))"
       entryPoints:
         - https
       service: nebula-front-test-svc
