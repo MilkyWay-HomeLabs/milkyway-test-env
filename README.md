@@ -1,5 +1,5 @@
 # MilkyWay Home Lab - Test Environment
-**Version: 1.0.0**
+**Version: 1.1.0**
 
 This repository contains the test environment configuration for the MilkyWay project, based on Docker Compose.
 
@@ -9,8 +9,10 @@ This repository contains the test environment configuration for the MilkyWay pro
 3. [TLS Certificates](#tls-certificates)
 4. [Environment Configuration](#environment-configuration)
 5. [Architecture and Containers](#architecture-and-containers)
-6. [Starting the Environment](#starting-the-environment)
-7. [License and Author](#license-and-author)
+6. [Backups](#backups)
+7. [Changelog](#changelog)
+8. [Starting the Environment](#starting-the-environment)
+9. [License and Author](#license-and-author)
 
 ## Prerequisites
 - Docker and Docker Compose installed.
@@ -46,7 +48,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 Copy the `.env.example` file to `.env` and fill in the required variables (e.g., Traefik dashboard password).
 
 ```bash
-cp .env.example.example .env.example
+cp .env.example .env
 ```
 
 ## Architecture and Containers
@@ -101,6 +103,10 @@ graph TD
     Grafana -->|Query| Prometheus
     Grafana -->|Query| Loki
 
+    backup-test --> MariaDB
+    backup-test --> Postgres
+    backup-test --> Mongo
+
     %% Styling
     classDef proxy fill:#f9f,stroke:#333,stroke-width:2px,color:#000;
     classDef app fill:#bbf,stroke:#333,stroke-width:1px,color:#000;
@@ -112,6 +118,21 @@ graph TD
     class MariaDB,Postgres,Mongo db;
     class Grafana,Prometheus,Loki,NodeExporter,Promtail monitor;
 ```
+
+## Backups
+The environment includes an automated backup service (`backup-test`) that performs periodic dumps of all databases (MariaDB, PostgreSQL, MongoDB).
+
+- **Backup Location**: Backups are stored in the `./backups` directory on the host.
+- **Retention**: Old backups are automatically rotated.
+- **Weekly Catch-up**: Since the test environment is not always on, a backup is automatically triggered on container start if one hasn't been run yet during the current week.
+- **Manual Trigger**:
+  ```bash
+  docker compose exec backup-test /usr/local/bin/run_backups.sh
+  ```
+For detailed configuration and restoration instructions, see [backup/README.md](backup/README.md).
+
+## Changelog
+Detailed history of changes can be found in [CHANGELOG.md](CHANGELOG.md).
 
 ## Starting the Environment
 To start all services:
