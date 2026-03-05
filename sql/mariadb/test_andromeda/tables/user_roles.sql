@@ -10,6 +10,6 @@ create table user_roles
         foreign key (role_id) references roles (role_id),
     constraint user_roles_users_user_id_fk
         foreign key (user_id) references users (user_id)
-)
+);
     engine = InnoDB;
 

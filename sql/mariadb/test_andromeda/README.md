@@ -5,7 +5,7 @@
 ![Author](https://img.shields.io/badge/Author-Szymon%20Derleta-white?style=for-the-badge)
 
 ![Release](https://img.shields.io/badge/Release-Public%20Release-green?style=for-the-badge)  
-![Version](https://img.shields.io/badge/Version-1.3.0-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.4.0-green?style=for-the-badge)
 
 </div>
 
@@ -22,6 +22,6 @@ archive/ – Stores legacy and archived materials for reference.
 
 ### Current Model Preview
 
-![andromeda-2025-04-05.png](model/andromeda-2025-04-05.png)
+![andromeda-2026-03-05.png](model/andromeda-2026-03-05.png)
 
-*Andromeda Schema - Last updated: 2026-02-05*
+*Andromeda Schema - Last updated: 2026-03-05*

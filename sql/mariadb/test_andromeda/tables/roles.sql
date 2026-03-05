@@ -5,4 +5,3 @@ create table roles
     role_name varchar(255) not null
 )
     engine = InnoDB;
-
