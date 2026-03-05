@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-03-05
+
+### Changed
+- Major refactoring of `test_andromeda` database schema, including tables for users, roles, and token management (access, refresh, confirmation).
+- Refreshed seed data for `test_andromeda` database with a focus on user and token management.
+- Updated `nebula-rest-api` application to a newer version (`nebula-rest-api##latest.war`).
+- Updated system architecture diagram for the `test_andromeda` database model.
+
+### Added
+- New `refresh_token_incidents` table for tracking token security events.
+- Added session expiration and encryption key properties to `andromeda-authorization.properties.example`.
+
 ## [1.2.0] - 2026-02-15
 
 ### Added
