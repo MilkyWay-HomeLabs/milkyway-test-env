@@ -207,10 +207,12 @@ services:
       - env/tomcat/.env
     environment:
       - JAVA_OPTS=-Xms512m -Xmx1g
+      - IMAGE_AVATAR_PATH=/app/fileserver/nebula/avatars
     volumes:
       - ./tomcat/app/nebula-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
       - ./tomcat/setenv/nebula/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
       - ./env/tomcat/nebula-rest.properties:/usr/local/tomcat/conf/nebula-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
     networks:
       - proxy
       - internal
