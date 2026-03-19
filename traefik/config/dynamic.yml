@@ -48,14 +48,14 @@ http:
       tls: { }
 
     nebula-dev:
-      rule: "Host(`nebula.dev.milkyway`) && PathPrefix(`/api`)"
+      rule: "Host(`nebula.dev.milkyway`) && (PathPrefix(`/api`) || PathPrefix(`/swagger-ui`) || PathPrefix(`/v3/api-docs`))"
       entryPoints:
         - https
       service: nebula-dev-svc
       tls: { }
 
     nebula-test:
-      rule: "Host(`nebula.test.milkyway`) && PathPrefix(`/api`)"
+      rule: "Host(`nebula.test.milkyway`) && (PathPrefix(`/api`) || PathPrefix(`/swagger-ui`) || PathPrefix(`/v3/api-docs`))"
       entryPoints:
         - https
       service: nebula-test-svc
