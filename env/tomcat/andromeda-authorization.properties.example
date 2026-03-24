@@ -19,6 +19,6 @@ ANDROMEDA_TEST_DB_URL=jdbc:mariadb://mariadb-test:3306/test_andromeda
 ANDROMEDA_TEST_DB_USERNAME=andromeda
 ANDROMEDA_TEST_DB_PASSWORD=your_db_password
 
-NEBULA_FRONT_APP_URL=https://nebula.test.milkyway/app/app/api/v1/
+NEBULA_FRONT_APP_URL=https://nebula.test.milkyway/app/
 NEBULA_CONFIRMATION_MAIL_URL=https://nebula.test.milkyway/app/confirm/
 ALLOWED_APPS_HEADERS=nebula_rest_api,element_rest_api,chess_rest_api,robak_rest_api,racer_rest_api
