@@ -6,8 +6,10 @@ services:
     security_opt:
       - "no-new-privileges:true"
     networks:
-      - proxy
-      - internal
+      proxy:
+        ipv4_address: 172.19.0.2
+      internal:
+        ipv4_address: 172.20.0.2
     ports:
       - "80:80"
       - "443:443"
@@ -118,8 +120,6 @@ services:
       - "traefik.http.services.fileserver-test.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy"
 
-
-
   backup-test:
     build: ./backup
     image: milkyway/backup-test:local
@@ -196,8 +196,10 @@ services:
       - ./tomcat/setenv/andromeda/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
       - ./env/tomcat/andromeda-authorization.properties:/usr/local/tomcat/conf/andromeda-authorization.properties:ro
     networks:
-      - proxy
-      - internal
+      proxy:
+        ipv4_address: 172.19.0.11
+      internal:
+        ipv4_address: 172.20.0.11
 
   tomcat-test-nebula:
     image: tomcat:10.1-jdk21-temurin
@@ -214,8 +216,12 @@ services:
       - ./env/tomcat/nebula-rest.properties:/usr/local/tomcat/conf/nebula-rest.properties:ro
       - ../../../resources/test:/app/fileserver
     networks:
-      - proxy
-      - internal
+      proxy:
+        ipv4_address: 172.19.0.12
+      internal:
+        ipv4_address: 172.20.0.12
+    extra_hosts:
+      - "andromeda.test.milkyway:172.19.0.11"
 
   nebula-front-app-test:
     build: ./nginx/nebula-front-app
@@ -245,6 +251,12 @@ networks:
   proxy:
     name: proxy
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24
   internal:
     name: internal
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
