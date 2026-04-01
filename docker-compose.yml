@@ -229,6 +229,7 @@ services:
       - ./tomcat/setenv/nebula/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
       - ./env/tomcat/nebula-rest.properties:/usr/local/tomcat/conf/nebula-rest.properties:ro
       - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
     networks:
       proxy:
         ipv4_address: 172.21.0.12

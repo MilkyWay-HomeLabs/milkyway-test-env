@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Import certificate into Java keystore
+CERT_FILE="/usr/local/share/ca-certificates/milkyway.crt"
+if [ -f "$CERT_FILE" ]; then
+    echo "Found certificate: $CERT_FILE. Importing into Java keystore..."
+    $JAVA_HOME/bin/keytool -importcert -trustcacerts -file "$CERT_FILE" \
+        -alias milkyway -keystore $JAVA_HOME/lib/security/cacerts \
+        -storepass changeit -noprompt || echo "Certificate already exists or failed to import"
+else
+    echo "WARNING: Certificate file not found: $CERT_FILE"
+fi
+
 PROPERTIES_FILE="/usr/local/tomcat/conf/nebula-rest.properties"
 
 if [ -f "$PROPERTIES_FILE" ]; then
