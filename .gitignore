@@ -13,3 +13,4 @@
 /env/tomcat/nebula-rest.properties
 /env/tomcat/.env
 
+/env/nginx/nebula/.env

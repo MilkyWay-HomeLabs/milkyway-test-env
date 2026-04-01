@@ -244,6 +244,8 @@ services:
     image: milkyway/nebula-front-app-test:local
     container_name: nebula-front-app-test
     restart: unless-stopped
+    env_file:
+      - env/nginx/nebula/.env
     networks:
       proxy:
         ipv4_address: 172.21.0.42
