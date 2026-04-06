@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-04-06
+
+### Added
+- Added `Milkyway` certificate support in `docker-compose.yml` with automatic import into the Java keystore.
+- Added `.env.example` for environment configuration.
+- Added routing rules for Swagger UI and API documentation paths for `nebula-rest-api` in Traefik's `dynamic.yml`.
+
+### Changed
+- Updated IPv4 address assignments for `proxy` and `internal` networks in `docker-compose.yml`.
+- Refined `nebula-front-app` Dockerfile build process and environment configuration.
+- Updated `NEBULA_FRONT_APP_URL` and cookie domain settings in `andromeda-authorization.properties.example`.
+
 ## [1.3.0] - 2026-03-05
 
 ### Changed
