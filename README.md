@@ -1,5 +1,5 @@
 # MilkyWay Home Lab - Test Environment
-**Version: 1.2.0**
+**Version: 1.4.0**
 
 This repository contains the test environment configuration for the MilkyWay project, based on Docker Compose.
 
@@ -19,17 +19,10 @@ This repository contains the test environment configuration for the MilkyWay pro
 - `openssl` (optional, for generating self-signed certificates).
 
 ## Local Domain Configuration (/etc/hosts)
-To access the services using their domain names, add the following entries to your `/etc/hosts` file (on Linux/macOS) or `C:\Windows\System32\drivers\etc\hosts` (on Windows):
+To access the services using their domain names, add the following entry to your `/etc/hosts` file (on Linux/macOS) or `C:\Windows\System32\drivers\etc\hosts` (on Windows):
 
 ```text
-127.0.0.1   traefik.test.milkyway
-127.0.0.1   prometheus.test.milkyway
-127.0.0.1   grafana.test.milkyway
-127.0.0.1   resources.test.milkyway
-127.0.0.1   andromeda.test.milkyway
-127.0.0.1   andromeda.dev.milkyway
-127.0.0.1   nebula.test.milkyway
-127.0.0.1   nebula.dev.milkyway
+127.0.0.1   milkyway.test
 ```
 
 ## TLS Certificates
@@ -38,12 +31,13 @@ The environment uses HTTPS. You need to provide TLS certificates for Traefik.
 1. Go to the `traefik/certs/` directory.
 2. Follow the instructions in [traefik/certs/README.md](traefik/certs/README.md) to generate a self-signed certificate or provide your own.
 
-Quick command to generate a test certificate:
+Quick command to generate a test certificate (including SAN for the root domain):
 ```bash
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout traefik/certs/milkyway.key \
   -out traefik/certs/milkyway.crt \
-  -subj "/C=PL/ST=Test/L=Test/O=MilkyWay/CN=*.test.milkyway"
+  -subj "/C=PL/ST=Test/L=Test/O=MilkyWay/CN=milkyway.test" \
+  -addext "subjectAltName = DNS:milkyway.test, DNS:*.milkyway.test"
 ```
 
 ## Environment Configuration
@@ -150,7 +144,7 @@ To start all services:
 ```bash
 docker compose up -d
 ```
-The Traefik dashboard will be available at [https://traefik.test.milkyway](https://traefik.test.milkyway).
+The Traefik dashboard will be available at [https://milkyway.test/traefik/](https://milkyway.test/traefik/).
 
 ## License and Author
 - **Author**: Szymon Derleta
