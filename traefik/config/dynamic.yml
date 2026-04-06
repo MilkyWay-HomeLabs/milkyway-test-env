@@ -36,14 +36,14 @@ http:
 
     # --- NEBULA APP (TEST) ---
     nebula-front-test:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/nebula`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/app/`)"
       entryPoints: ["https"]
       service: "nebula-front-test-svc"
       # IMPORTANT: If Nebula Frontend is React/Vite, use base: "/nebula/"
       tls: {}
 
     nebula-api-test:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/api/nebula`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/api`)"
       entryPoints: ["https"]
       service: "nebula-test-svc"
       middlewares: ["strip-nebula"]
@@ -51,7 +51,7 @@ http:
 
     # --- ANDROMEDA APP (TEST) ---
     andromeda-api-test:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/api/andromeda`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda/api`)"
       entryPoints: ["https"]
       service: "andromeda-test-svc"
       middlewares: ["strip-andromeda"]
@@ -59,21 +59,21 @@ http:
 
     # --- DEVELOPMENT ENVIRONMENT ---
     nebula-front-dev:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/app/`)"
       entryPoints: ["https"]
       service: "nebula-front-dev-svc"
       middlewares: ["strip-nebula-front-dev"]
       tls: {}
 
     nebula-api-dev:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/api/nebula`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/api`)"
       entryPoints: ["https"]
       service: "nebula-dev-svc"
       middlewares: ["strip-nebula-dev"]
       tls: {}
 
     andromeda-api-dev:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/api/andromeda`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/andromeda/api`)"
       entryPoints: ["https"]
       service: "andromeda-dev-svc"
       middlewares: ["strip-andromeda-dev"]
@@ -118,16 +118,16 @@ http:
         prefixes: ["/resources"]
     strip-andromeda:
       stripPrefix:
-        prefixes: ["/api/andromeda"]
+        prefixes: ["/andromeda/api"]
     strip-nebula:
       stripPrefix:
-        prefixes: ["/api/nebula"]
+        prefixes: ["/nebula/api"]
     strip-andromeda-dev:
       stripPrefix:
-        prefixes: ["/dev/api/andromeda"]
+        prefixes: ["/dev/andromeda/api"]
     strip-nebula-dev:
       stripPrefix:
-        prefixes: ["/dev/api/nebula"]
+        prefixes: ["/dev/nebula/api"]
     strip-nebula-front-dev:
       stripPrefix:
-        prefixes: ["/dev/nebula"]
+        prefixes: ["/dev/nebula/app/"]
