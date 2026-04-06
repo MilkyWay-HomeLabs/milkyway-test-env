@@ -49,6 +49,13 @@ http:
       # IMPORTANT: If Nebula Frontend is React/Vite, use base: "/nebula/"
       tls: {}
 
+    nebula-swagger-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/nebula/swagger-ui`) || PathPrefix(`/nebula/v3/api-docs`))"
+      entryPoints: ["https"]
+      service: "nebula-test-svc"
+#      middlewares: ["strip-nebula"]
+      tls: {}
+
     nebula-api-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/api`)"
       entryPoints: ["https"]
