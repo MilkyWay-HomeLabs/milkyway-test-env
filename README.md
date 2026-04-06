@@ -144,7 +144,7 @@ To start all services:
 ```bash
 docker compose up -d
 ```
-The Traefik dashboard will be available at [https://milkyway.test/traefik/](https://milkyway.test/traefik/).
+The Traefik dashboard will be available at [https://milkyway.test/dashboard/](https://milkyway.test/dashboard/).
 
 ## License and Author
 - **Author**: Szymon Derleta

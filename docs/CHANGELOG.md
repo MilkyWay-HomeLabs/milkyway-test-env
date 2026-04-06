@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Updated IPv4 address assignments for `proxy` and `internal` networks in `docker-compose.yml`.
 - Refined `nebula-front-app` Dockerfile build process and environment configuration.
 - Updated `NEBULA_FRONT_APP_URL` and cookie domain settings in `andromeda-authorization.properties.example`.
+- Transitioned to path-based routing under `milkyway.test` domain, replacing previous subdomain structure (`*.test.milkyway`).
+- Updated `PROJECT_DOCUMENTATION.md` and `README.md` to reflect the new domain structure and endpoints.
 
 ## [1.3.0] - 2026-03-05
 
