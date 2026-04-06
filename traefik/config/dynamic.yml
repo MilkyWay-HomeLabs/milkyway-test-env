@@ -7,11 +7,18 @@ http:
   routers:
     # --- INFRASTRUCTURE ---
     dashboard:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/traefik`)"
-      entryPoints: ["https"]
-      service: "api@internal"
-      middlewares: ["strip-traefik"]
-      tls: {}
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dashboard`)"
+      entryPoints:
+        - https
+      service: api@internal
+      tls: { }
+
+    dashboard-api:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/api`)"
+      entryPoints:
+        - https
+      service: api@internal
+      tls: { }
 
     prometheus:
       rule: "Host(`milkyway.test`) && PathPrefix(`/prometheus`)"
@@ -51,7 +58,7 @@ http:
 
     # --- ANDROMEDA APP (TEST) ---
     andromeda-api-test:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda/api`)"
+      rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda`)"
       entryPoints: ["https"]
       service: "andromeda-test-svc"
       middlewares: ["strip-andromeda"]
@@ -110,24 +117,24 @@ http:
         servers: [{ url: "http://host.docker.internal:5173" }]
 
   middlewares:
-    strip-traefik:
-      stripPrefix:
-        prefixes: ["/traefik"]
+#    strip-traefik:
+#      stripPrefix:
+#        prefixes: ["/traefik"]
     strip-resources:
       stripPrefix:
         prefixes: ["/resources"]
     strip-andromeda:
       stripPrefix:
-        prefixes: ["/andromeda/api"]
-    strip-nebula:
-      stripPrefix:
-        prefixes: ["/nebula/api"]
+        prefixes: ["/andromeda"]
     strip-andromeda-dev:
       stripPrefix:
-        prefixes: ["/dev/andromeda/api"]
+        prefixes: ["/dev/andromeda"]
+    strip-nebula:
+      stripPrefix:
+        prefixes: ["/nebula"]
     strip-nebula-dev:
       stripPrefix:
-        prefixes: ["/dev/nebula/api"]
+        prefixes: ["/dev/nebula"]
     strip-nebula-front-dev:
       stripPrefix:
         prefixes: ["/dev/nebula/app/"]
