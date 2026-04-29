@@ -209,7 +209,6 @@ services:
     extra_hosts:
       - "milkyway.test:172.21.0.2"
 
-
   tomcat-test-nebula:
     image: tomcat:10.1-jdk21-temurin
     container_name: tomcat-test-nebula
