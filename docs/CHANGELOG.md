@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-04-29
+
+### Added
+- Added new database configurations for PostgreSQL: `test_players` and `test_hacman` with dedicated users.
+- Added environment variables for Nebula frontend in `.env.example` (`VITE_RESOURCES_DOMAIN`, `PLAYWRIGHT_IGNORE_HTTPS`, `PLAYWRIGHT_BASE_URL`).
+- Added routing rules for development environment of Nebula and Andromeda applications in Traefik.
+
+### Changed
+- Updated Traefik configuration to support path-based routing for development environments (`/dev/nebula`, `/dev/andromeda`).
+- Cleaned up `docker-compose.yml` for better readability.
+
+## [1.4.0] - 2026-04-06
+
+### Added
+- Added `Milkyway` certificate support in `docker-compose.yml` with automatic import into the Java keystore.
+- Added `.env.example` for environment configuration.
+- Added routing rules for Swagger UI and API documentation paths for `nebula-rest-api` in Traefik's `dynamic.yml`.
+
+### Changed
+- Updated IPv4 address assignments for `proxy` and `internal` networks in `docker-compose.yml`.
+- Refined `nebula-front-app` Dockerfile build process and environment configuration.
+- Updated `NEBULA_FRONT_APP_URL` and cookie domain settings in `andromeda-authorization.properties.example`.
+- Transitioned to path-based routing under `milkyway.test` domain, replacing previous subdomain structure (`*.test.milkyway`).
+- Updated `PROJECT_DOCUMENTATION.md` and `README.md` to reflect the new domain structure and endpoints.
+
 ## [1.3.0] - 2026-03-05
 
 ### Changed

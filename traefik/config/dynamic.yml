@@ -5,124 +5,143 @@ tls:
 
 http:
   routers:
+    # --- INFRASTRUCTURE ---
     dashboard:
-      rule: Host(`traefik.test.milkyway`)
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dashboard`)"
+      entryPoints:
+        - https
+      service: api@internal
+      tls: { }
+
+    dashboard-api:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/api`)"
       entryPoints:
         - https
       service: api@internal
       tls: { }
 
     prometheus:
-      rule: Host(`prometheus.test.milkyway`)
-      entryPoints:
-        - https
-      service: prometheus-svc
-      tls: { }
+      rule: "Host(`milkyway.test`) && PathPrefix(`/prometheus`)"
+      entryPoints: ["https"]
+      service: "prometheus-svc"
+      # Requires --web.external-url=https://milkyway.test/prometheus/ flag in Prometheus
+      tls: {}
 
     grafana:
-      rule: Host(`grafana.test.milkyway`)
-      entryPoints:
-        - https
-      service: grafana-svc
-      tls: { }
+      rule: "Host(`milkyway.test`) && PathPrefix(`/grafana`)"
+      entryPoints: ["https"]
+      service: "grafana-svc"
+      # Requires GF_SERVER_ROOT_URL=https://milkyway.test/grafana/ in Grafana environment
+      tls: {}
 
     resources:
-      rule: Host(`resources.test.milkyway`)
-      entryPoints:
-        - https
-      service: resources-svc
-      tls: { }
+      rule: "Host(`milkyway.test`) && PathPrefix(`/resources`)"
+      entryPoints: ["https"]
+      service: "resources-svc"
+      middlewares: ["strip-resources"]
+      tls: {}
 
-    andromeda-dev:
-      rule: "Host(`andromeda.dev.milkyway`) && PathPrefix(`/api`)"
-      entryPoints:
-        - https
-      service: andromeda-dev-svc
-      tls: { }
-
-    andromeda-test:
-      rule: "Host(`andromeda.test.milkyway`) && PathPrefix(`/api`)"
-      entryPoints:
-        - https
-      service: andromeda-test-svc
-      tls: { }
-
-    nebula-dev:
-      rule: "Host(`nebula.dev.milkyway`) && (PathPrefix(`/api`) || PathPrefix(`/swagger-ui`) || PathPrefix(`/v3/api-docs`))"
-      entryPoints:
-        - https
-      service: nebula-dev-svc
-      tls: { }
-
-    nebula-test:
-      rule: "Host(`nebula.test.milkyway`) && (PathPrefix(`/api`) || PathPrefix(`/swagger-ui`) || PathPrefix(`/v3/api-docs`))"
-      entryPoints:
-        - https
-      service: nebula-test-svc
-      tls: { }
-
-    nebula-front-dev:
-      rule: "Host(`nebula.dev.milkyway`) && PathPrefix(`/app`)"
-      entryPoints:
-        - https
-      service: nebula-front-dev-svc
-      tls: { }
-
+    # --- NEBULA APP (TEST) ---
     nebula-front-test:
-      rule: "Host(`nebula.test.milkyway`) && PathPrefix(`/app`)"
-      entryPoints:
-        - https
-      service: nebula-front-test-svc
-      tls: { }
+      rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/app/`)"
+      entryPoints: ["https"]
+      service: "nebula-front-test-svc"
+      # IMPORTANT: If Nebula Frontend is React/Vite, use base: "/nebula/"
+      tls: {}
+
+    nebula-swagger-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/nebula/swagger-ui`) || PathPrefix(`/nebula/v3/api-docs`))"
+      entryPoints: ["https"]
+      service: "nebula-test-svc"
+#      middlewares: ["strip-nebula"]
+      tls: {}
+
+    nebula-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/api`)"
+      entryPoints: ["https"]
+      service: "nebula-test-svc"
+      middlewares: ["strip-nebula"]
+      tls: {}
+
+    # --- ANDROMEDA APP (TEST) ---
+    andromeda-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda`)"
+      entryPoints: ["https"]
+      service: "andromeda-test-svc"
+      middlewares: ["strip-andromeda"]
+      tls: {}
+
+    # --- DEVELOPMENT ENVIRONMENT ---
+    nebula-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/app/`)"
+      entryPoints: ["https"]
+      service: "nebula-front-dev-svc"
+      middlewares: ["strip-nebula-front-dev"]
+      tls: {}
+
+    nebula-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/api`)"
+      entryPoints: ["https"]
+      service: "nebula-dev-svc"
+      middlewares: ["strip-nebula-dev"]
+      tls: {}
+
+    andromeda-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/andromeda/api`)"
+      entryPoints: ["https"]
+      service: "andromeda-dev-svc"
+      middlewares: ["strip-andromeda-dev"]
+      tls: {}
 
   services:
     resources-svc:
       loadBalancer:
-        servers:
-          - url: "http://fileserver-test:80"
-
+        servers: [{ url: "http://fileserver-test:80" }]
     prometheus-svc:
       loadBalancer:
-        servers:
-          - url: "http://prometheus:9090"
-
+        servers: [{ url: "http://prometheus:9090" }]
     grafana-svc:
       loadBalancer:
-        servers:
-          - url: "http://grafana:3000"
-
-    andromeda-dev-svc:
-      loadBalancer:
-        servers:
-          - url: "http://host.docker.internal:8444"
-
+        servers: [{ url: "http://grafana:3000" }]
     andromeda-test-svc:
       loadBalancer:
-        servers:
-          - url: "http://tomcat-test-andromeda:8080"
-
-    nebula-dev-svc:
-      loadBalancer:
-        servers:
-          - url: "http://host.docker.internal:8445"
-
+        servers: [{ url: "http://tomcat-test-andromeda:8080" }]
     nebula-test-svc:
       loadBalancer:
-        servers:
-          - url: "http://tomcat-test-nebula:8080"
-
-    nebula-front-dev-svc:
-      loadBalancer:
-        servers:
-          - url: "http://host.docker.internal:5173"
-
+        servers: [{ url: "http://tomcat-test-nebula:8080" }]
     nebula-front-test-svc:
       loadBalancer:
-        servers:
-          - url: "http://nebula-front-app-test:80"
+        servers: [{ url: "http://nebula-front-app-test:80" }]
+    # Dev endpoints
+    andromeda-dev-svc:
+      loadBalancer:
+        servers: [{ url: "http://host.docker.internal:8444" }]
+    nebula-dev-svc:
+      loadBalancer:
+        servers: [{ url: "http://host.docker.internal:8445" }]
+    nebula-front-dev-svc:
+      loadBalancer:
+        servers: [{ url: "http://host.docker.internal:5173" }]
 
-#  middlewares:
-#    nebula-front-dev-strip-app:
+  middlewares:
+#    strip-traefik:
 #      stripPrefix:
-#        prefixes:
-#          - /app
+#        prefixes: ["/traefik"]
+    strip-resources:
+      stripPrefix:
+        prefixes: ["/resources"]
+    strip-andromeda:
+      stripPrefix:
+        prefixes: ["/andromeda"]
+    strip-andromeda-dev:
+      stripPrefix:
+        prefixes: ["/dev/andromeda"]
+    strip-nebula:
+      stripPrefix:
+        prefixes: ["/nebula"]
+    strip-nebula-dev:
+      stripPrefix:
+        prefixes: ["/dev/nebula"]
+    strip-nebula-front-dev:
+      stripPrefix:
+        prefixes: ["/dev/nebula/app/"]
