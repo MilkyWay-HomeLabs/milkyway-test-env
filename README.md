@@ -1,5 +1,5 @@
 # MilkyWay Home Lab - Test Environment
-**Version: 1.4.0**
+**Version: 1.5.0**
 
 This repository contains the test environment configuration for the MilkyWay project, based on Docker Compose.
 
@@ -94,9 +94,10 @@ graph TD
     Traefik -->|Routing| TomcatNebula
     Traefik -->|Routing| NebulaFront
     Traefik -->|Routing| Fileserver
-    Traefik -->|Routing| AndromedaDev
     Traefik -->|Routing| Grafana
     Traefik -->|Routing| Prometheus
+    Traefik -->|Routing| DevEnv[Dev Environments]
+    Traefik -.->|Proxy to Host| AndromedaDev
 
     TomcatAndromeda --> MariaDB
     TomcatNebula --> MariaDB

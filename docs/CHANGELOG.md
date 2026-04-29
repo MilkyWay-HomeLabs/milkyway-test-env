@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-04-29
+
+### Added
+- Added new database configurations for PostgreSQL: `test_players` and `test_hacman` with dedicated users.
+- Added environment variables for Nebula frontend in `.env.example` (`VITE_RESOURCES_DOMAIN`, `PLAYWRIGHT_IGNORE_HTTPS`, `PLAYWRIGHT_BASE_URL`).
+- Added routing rules for development environment of Nebula and Andromeda applications in Traefik.
+
+### Changed
+- Updated Traefik configuration to support path-based routing for development environments (`/dev/nebula`, `/dev/andromeda`).
+- Cleaned up `docker-compose.yml` for better readability.
+
 ## [1.4.0] - 2026-04-06
 
 ### Added

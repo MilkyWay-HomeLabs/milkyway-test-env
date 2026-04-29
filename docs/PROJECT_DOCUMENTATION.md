@@ -60,7 +60,7 @@ Two main networks are defined in the system:
 | Container         | Image         | Networks   | Ports (Host) | Description          |
 |:------------------|:--------------|:-----------|:-------------|:---------------------|
 | **mariadb-test**  | `mariadb:11`  | `internal` | `3306`       | MariaDB database.    |
-| **postgres-test** | `postgres:16` | `internal` | `5432`       | PostgreSQL database. |
+| **postgres-test** | `postgres:16` | `internal` | `5432`       | PostgreSQL database (databases: `hacman`, `test_hacman`, `test_players`). |
 | **mongo-test**    | `mongo:8`     | `internal` | `27017`      | MongoDB database.    |
 
 ---
@@ -81,6 +81,9 @@ redirected to **HTTPS (443)**.
 | **Grafana**           | `https://milkyway.test/grafana`     | External | Grafana Login                     |
 | **Prometheus**        | `https://milkyway.test/prometheus`  | External | None (Public within test network) |
 | **File Server**       | `https://milkyway.test/resources`   | External | None (Public)                     |
+| **Nebula API (Dev)** | `https://milkyway.test/dev/nebula/api` | External | App-dependent                     |
+| **Nebula App (Dev)** | `https://milkyway.test/dev/nebula/app` | External | None (Login Required)             |
+| **Andromeda API (Dev)**| `https://milkyway.test/dev/andromeda/api`| External | App-dependent                   |
 
 ### Internal Endpoints (Docker Network)
 
