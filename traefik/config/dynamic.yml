@@ -41,6 +41,28 @@ http:
       middlewares: ["strip-resources"]
       tls: {}
 
+    # --- HACMAN APP (TEST) ---
+    hacman-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/game/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-game-test-svc"
+      middlewares: [ "strip-hacman-game-test" ]
+      tls: { }
+
+    hacman-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/app/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-front-test-svc"
+      middlewares: [ "strip-hacman-front-test" ]
+      tls: { }
+
+    hacman-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/api`)"
+      entryPoints: ["https"]
+      service: "hacman-test-svc"
+      middlewares: ["strip-hacman-test"]
+      tls: {}
+
     # --- NEBULA APP (TEST) ---
     nebula-front-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/app/`)"
@@ -72,6 +94,27 @@ http:
       tls: {}
 
     # --- DEVELOPMENT ENVIRONMENT ---
+    hacman-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/game/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-game-dev-svc"
+      middlewares: [ "strip-hacman-game-dev" ]
+      tls: { }
+
+    hacman-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/app/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-front-dev-svc"
+      middlewares: [ "strip-hacman-front-dev" ]
+      tls: { }
+
+    hacman-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/api`)"
+      entryPoints: ["https"]
+      service: "hacman-dev-svc"
+      middlewares: ["strip-hacman-dev"]
+      tls: {}
+
     nebula-front-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/app/`)"
       entryPoints: ["https"]
@@ -112,6 +155,15 @@ http:
     nebula-front-test-svc:
       loadBalancer:
         servers: [{ url: "http://nebula-front-app-test:80" }]
+    hacman-test-svc:
+      loadBalancer:
+        servers: [{ url: "http://tomcat-test-hacman:8080" }]
+    hacman-front-test-svc:
+      loadBalancer:
+        servers: [{ url: "http://hacman-front-app-test:80" }]
+    hacman-game-test-svc:
+      loadBalancer:
+        servers: [{ url: "http://hacman-game-app-test:80" }]
     # Dev endpoints
     andromeda-dev-svc:
       loadBalancer:
@@ -122,6 +174,15 @@ http:
     nebula-front-dev-svc:
       loadBalancer:
         servers: [{ url: "http://host.docker.internal:5173" }]
+    hacman-dev-svc:
+      loadBalancer:
+        servers: [{ url: "http://host.docker.internal:8446" }]
+    hacman-front-dev-svc:
+      loadBalancer:
+        servers: [{ url: "http://host.docker.internal:5174" }]
+    hacman-game-dev-svc:
+      loadBalancer:
+        servers: [{ url: "http://host.docker.internal:5175" }]
 
   middlewares:
 #    strip-traefik:
@@ -145,3 +206,12 @@ http:
     strip-nebula-front-dev:
       stripPrefix:
         prefixes: ["/dev/nebula/app/"]
+    strip-hacman:
+      stripPrefix:
+        prefixes: ["/hacman"]
+    strip-hacman-dev:
+      stripPrefix:
+        prefixes: ["/dev/hacman"]
+    strip-hacman-front-dev:
+      stripPrefix:
+        prefixes: ["/dev/hacman/app/"]
