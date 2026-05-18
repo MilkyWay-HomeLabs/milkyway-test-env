@@ -246,7 +246,7 @@ services:
   hacman-app-back:
     image: hacman-app-back
     build:
-      context: ./kestrelu/hacman-app-back
+      context: kestrel/hacman-app-back
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
@@ -260,7 +260,7 @@ services:
   hacman-app-front:
     image: hacman-app-front
     build:
-      context: ./kestrelu/hacman-app-front
+      context: kestrel/hacman-app-front
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:

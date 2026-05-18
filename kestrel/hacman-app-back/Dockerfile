@@ -8,7 +8,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["hacman-app-back.csproj", "."]
 RUN dotnet restore "hacman-app-back.csproj"
-COPY ../../../../solution/hacman-app/hacman-app-back .
+COPY . .
 RUN dotnet build "hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
