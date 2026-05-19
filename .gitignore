@@ -18,3 +18,4 @@
 /nginx/hacman-game-app/dist/
 /kestrel/hacman-app-back/
 /kestrel/hacman-app-front/
+/env/kestrel/hacman/back/.env

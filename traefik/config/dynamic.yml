@@ -64,12 +64,28 @@ http:
       priority: 100
       tls: { }
 
+#    hacman-swagger:
+#      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/api/swagger`)"
+#      entryPoints: ["https"]
+#      service: "hacman-test-svc"
+#      middlewares: ["strip-hacman-test"]
+#      priority: 250
+#      tls: {}
+
     hacman-api-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/api`)"
-      entryPoints: [ "https" ]
+      entryPoints: ["https"]
       service: "hacman-test-svc"
-      middlewares: [ "strip-hacman-test" ]
-      tls: { }
+      middlewares: ["strip-hacman-test"]
+      priority: 150
+      tls: {}
+
+    hacman-swagger-root:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/swagger`)"
+      entryPoints: ["https"]
+      service: "hacman-test-svc"
+      priority: 200
+      tls: {}
 
     # --- NEBULA APP (TEST) ---
     nebula-front-test:

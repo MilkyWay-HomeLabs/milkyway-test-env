@@ -245,12 +245,17 @@ services:
 
   hacman-app-back:
     image: hacman-app-back
+    container_name: hacman-app-back-test
     build:
       context: kestrel/hacman-app-back
       dockerfile: Dockerfile
     restart: unless-stopped
+    depends_on:
+      - postgres-test
     environment:
       - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - env/kestrel/hacman/back/.env
     networks:
       proxy:
         ipv4_address: 172.21.0.13
@@ -259,6 +264,7 @@ services:
 
   hacman-app-front:
     image: hacman-app-front
+    container_name: hacman-app-front-test
     build:
       context: kestrel/hacman-app-front
       dockerfile: Dockerfile
