@@ -46,7 +46,7 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/game/`)"
       entryPoints: [ "https" ]
       service: "hacman-game-test-svc"
-      middlewares: [ "strip-hacman-game-test" ]
+#      middlewares: [ "strip-hacman-game-test" ]
       tls: { }
 
     hacman-front-test-static:
@@ -123,7 +123,7 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/game/`)"
       entryPoints: [ "https" ]
       service: "hacman-game-dev-svc"
-      middlewares: [ "strip-hacman-game-dev" ]
+#      middlewares: [ "strip-hacman-game-dev" ]
       tls: { }
 
     hacman-front-dev:
@@ -206,7 +206,6 @@ http:
         serversTransport: "dev-insecure"
         servers:
           - url: "https://host.docker.internal:7296"
-
     hacman-game-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5175" } ]
