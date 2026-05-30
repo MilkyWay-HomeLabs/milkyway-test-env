@@ -273,6 +273,8 @@ services:
       - hacman-app-back
     environment:
       - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - env/kestrel/hacman/front/.env
     networks:
       proxy:
         ipv4_address: 172.21.0.43
