@@ -60,31 +60,15 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/app/`)"
       entryPoints: [ "https" ]
       service: "hacman-front-test-svc"
-#      middlewares: [ "strip-hacman-front-test" ]
       priority: 100
       tls: { }
 
-#    hacman-swagger:
-#      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/api/swagger`)"
-#      entryPoints: ["https"]
-#      service: "hacman-test-svc"
-#      middlewares: ["strip-hacman-test"]
-#      priority: 250
-#      tls: {}
-
     hacman-api-test:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/api`)"
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/hacman/api`) || PathPrefix(`/hacman/swagger`))"
       entryPoints: ["https"]
       service: "hacman-test-svc"
       middlewares: ["strip-hacman-test"]
       priority: 150
-      tls: {}
-
-    hacman-swagger-root:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/swagger`)"
-      entryPoints: ["https"]
-      service: "hacman-test-svc"
-      priority: 200
       tls: {}
 
     # --- NEBULA APP (TEST) ---
@@ -143,7 +127,6 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/app/`)"
       entryPoints: [ "https" ]
       service: "nebula-front-dev-svc"
-#      middlewares: [ "strip-nebula-front-dev" ]
       tls: { }
 
     nebula-api-dev:
@@ -243,7 +226,7 @@ http:
         prefixes: [ "/dev/hacman/app/" ]
     strip-hacman-test:
       stripPrefix:
-        prefixes: [ "/hacman/api" ]
+        prefixes: [ "/hacman/api", "/hacman" ]
     strip-hacman-front-test:
       stripPrefix:
         prefixes: [ "/hacman/app" ]

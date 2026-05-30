@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-05-30
+
+### Added
+- Integrated **Hacman** application components: `hacman-app-back` (Kestrel), `hacman-app-front` (Kestrel), and `hacman-game-app` (Nginx).
+- Added new environment variable examples for Hacman services: `env/kestrel/hacman/back/.env.example` and `env/nginx/hacman/.env.example`.
+- Configured Traefik routing rules for Hacman API and Game application.
+
+### Changed
+- Updated Hacman Swagger routing to use `/hacman/swagger` instead of root `/swagger`.
+- Updated Hacman Game routing to use `/hacman/game` instead of `/hacman/app`.
+- Updated `README.md` and project documentation to version 1.6.0.
+- Standardized all documentation to English.
+
 ## [1.5.0] - 2026-04-29
 
 ### Added
