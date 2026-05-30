@@ -6,8 +6,11 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["hacman-app-front.csproj", "."]
+
+# FIX: Copy the file into a 'latest/' directory inside the container
+COPY ["latest/hacman-app-front.csproj", "latest/"]
 RUN dotnet restore "latest/hacman-app-front.csproj"
+
 COPY . .
 RUN dotnet build "latest/hacman-app-front.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
