@@ -243,6 +243,51 @@ services:
       proxy:
         ipv4_address: 172.21.0.42
 
+  hacman-app-back:
+    image: hacman-app-back
+    container_name: hacman-app-back-test
+    build:
+      context: kestrel/hacman-app-back
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - postgres-test
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - env/kestrel/hacman/back/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.13
+      internal:
+        ipv4_address: 172.22.0.13
+
+  hacman-app-front:
+    image: hacman-app-front
+    container_name: hacman-app-front-test
+    build:
+      context: kestrel/hacman-app-front
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - hacman-app-back
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.43
+
+  hacman-game-front:
+    build: ./nginx/hacman-game-app
+    image: milkyway/hacman-game-app-test:local
+    container_name: hacman-game-app-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/hacman/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.44
+
 volumes:
   prometheus-data:
     driver: local

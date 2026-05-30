@@ -12,3 +12,5 @@ SPRING_SECURITY_PASSWORD=your_spring_security_password
 SPRING_SECURITY_USERNAME=nebula
 USER_AVATAR_UPLOAD_PATH=/var/www/html/user/avatar
 USER_AVATAR_UPLOAD_TEST_PATH=/var/www/html/user/avatar
+CORS_ALLOWED_ORIGIN_PATTERNS=https://milkyway.test,https://*.milkyway.test,https://milkyway.inet,https://*.milkyway.inet,https://*.milkyway,https://*.test.milkyway,https://*.dev.milkyway}
+APP_RESOURCES_BASE_URL=https://milkyway.test/resources/nebula/

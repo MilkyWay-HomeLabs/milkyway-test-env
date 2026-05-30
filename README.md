@@ -1,5 +1,5 @@
 # MilkyWay Home Lab - Test Environment
-**Version: 1.5.0**
+**Version: 1.6.0**
 
 This repository contains the test environment configuration for the MilkyWay project, based on Docker Compose.
 
@@ -48,7 +48,7 @@ cp .env.example .env
 ```
 
 ## Documentation and Architecture
-Więcej szczegółów technicznych znajduje się w katalogu [docs/](docs/).
+More technical details can be found in the [docs/](docs/) directory.
 
 ### Architecture and Containers
 Detailed technical specification of containers, networks, and endpoints can be found in [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md).

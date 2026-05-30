@@ -22,126 +22,221 @@ http:
 
     prometheus:
       rule: "Host(`milkyway.test`) && PathPrefix(`/prometheus`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "prometheus-svc"
       # Requires --web.external-url=https://milkyway.test/prometheus/ flag in Prometheus
-      tls: {}
+      tls: { }
 
     grafana:
       rule: "Host(`milkyway.test`) && PathPrefix(`/grafana`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "grafana-svc"
       # Requires GF_SERVER_ROOT_URL=https://milkyway.test/grafana/ in Grafana environment
-      tls: {}
+      tls: { }
 
     resources:
       rule: "Host(`milkyway.test`) && PathPrefix(`/resources`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "resources-svc"
-      middlewares: ["strip-resources"]
+      middlewares: [ "strip-resources" ]
+      tls: { }
+
+    # --- HACMAN APP (TEST) ---
+    hacman-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/game/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-game-test-svc"
+#      middlewares: [ "strip-hacman-game-test" ]
+      tls: { }
+
+    hacman-front-test-static:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/hacman/app/lib/`) || PathPrefix(`/hacman/app/css/`) || PathPrefix(`/hacman/app/js/`) || PathPrefix(`/hacman/app/_framework/`) || PathPrefix(`/hacman/app/app.`) || PathPrefix(`/hacman/app/hacman-app-front.`) || Path(`/hacman/app/favicon.png`))"
+      entryPoints: [ "https" ]
+      service: "hacman-front-test-svc"
+      priority: 200
+      tls: { }
+
+    hacman-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/app/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-front-test-svc"
+      priority: 100
+      tls: { }
+
+    hacman-api-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/hacman/api`) || PathPrefix(`/hacman/swagger`))"
+      entryPoints: ["https"]
+      service: "hacman-test-svc"
+      middlewares: ["strip-hacman-test"]
+      priority: 150
       tls: {}
 
     # --- NEBULA APP (TEST) ---
     nebula-front-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/app/`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "nebula-front-test-svc"
       # IMPORTANT: If Nebula Frontend is React/Vite, use base: "/nebula/"
-      tls: {}
+      tls: { }
 
     nebula-swagger-test:
       rule: "Host(`milkyway.test`) && (PathPrefix(`/nebula/swagger-ui`) || PathPrefix(`/nebula/v3/api-docs`))"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "nebula-test-svc"
-#      middlewares: ["strip-nebula"]
-      tls: {}
+      #      middlewares: ["strip-nebula"]
+      tls: { }
 
     nebula-api-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/nebula/api`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "nebula-test-svc"
-      middlewares: ["strip-nebula"]
-      tls: {}
+      middlewares: [ "strip-nebula" ]
+      tls: { }
 
     # --- ANDROMEDA APP (TEST) ---
     andromeda-api-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "andromeda-test-svc"
-      middlewares: ["strip-andromeda"]
-      tls: {}
+      middlewares: [ "strip-andromeda" ]
+      tls: { }
 
     # --- DEVELOPMENT ENVIRONMENT ---
+
+    hacman-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/game/`)"
+      entryPoints: [ "https" ]
+      service: "hacman-game-dev-svc"
+#      middlewares: [ "strip-hacman-game-dev" ]
+      tls: { }
+
+    hacman-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/app`)"
+      entryPoints: ["https"]
+      service: "hacman-front-dev-svc"
+      tls: {}
+
+    hacman-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/api`)"
+      entryPoints: [ "https" ]
+      service: "hacman-dev-svc"
+      middlewares: [ "strip-hacman-dev" ]
+      tls: { }
+
     nebula-front-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/app/`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "nebula-front-dev-svc"
-      middlewares: ["strip-nebula-front-dev"]
-      tls: {}
+      tls: { }
 
     nebula-api-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/nebula/api`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "nebula-dev-svc"
-      middlewares: ["strip-nebula-dev"]
-      tls: {}
+      middlewares: [ "strip-nebula-dev" ]
+      tls: { }
 
     andromeda-api-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/andromeda/api`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "andromeda-dev-svc"
-      middlewares: ["strip-andromeda-dev"]
-      tls: {}
+      middlewares: [ "strip-andromeda-dev" ]
+      tls: { }
 
   services:
     resources-svc:
       loadBalancer:
-        servers: [{ url: "http://fileserver-test:80" }]
+        servers: [ { url: "http://fileserver-test:80" } ]
     prometheus-svc:
       loadBalancer:
-        servers: [{ url: "http://prometheus:9090" }]
+        servers: [ { url: "http://prometheus:9090" } ]
     grafana-svc:
       loadBalancer:
-        servers: [{ url: "http://grafana:3000" }]
+        servers: [ { url: "http://grafana:3000" } ]
     andromeda-test-svc:
       loadBalancer:
-        servers: [{ url: "http://tomcat-test-andromeda:8080" }]
+        servers: [ { url: "http://tomcat-test-andromeda:8080" } ]
     nebula-test-svc:
       loadBalancer:
-        servers: [{ url: "http://tomcat-test-nebula:8080" }]
+        servers: [ { url: "http://tomcat-test-nebula:8080" } ]
     nebula-front-test-svc:
       loadBalancer:
-        servers: [{ url: "http://nebula-front-app-test:80" }]
+        servers: [ { url: "http://nebula-front-app-test:80" } ]
+    hacman-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hacman-app-back:8080" } ]
+    hacman-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hacman-app-front:8080" } ]
+    hacman-game-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hacman-game-app-test:80" } ]
     # Dev endpoints
     andromeda-dev-svc:
       loadBalancer:
-        servers: [{ url: "http://host.docker.internal:8444" }]
+        servers: [ { url: "http://host.docker.internal:8444" } ]
     nebula-dev-svc:
       loadBalancer:
-        servers: [{ url: "http://host.docker.internal:8445" }]
+        servers: [ { url: "http://host.docker.internal:8445" } ]
     nebula-front-dev-svc:
       loadBalancer:
-        servers: [{ url: "http://host.docker.internal:5173" }]
+        servers: [ { url: "http://host.docker.internal:5173" } ]
+    hacman-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:8446" } ]
+    hacman-front-dev-svc:
+      loadBalancer:
+        serversTransport: "dev-insecure"
+        servers:
+          - url: "https://host.docker.internal:7296"
+    hacman-game-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5175" } ]
 
   middlewares:
-#    strip-traefik:
-#      stripPrefix:
-#        prefixes: ["/traefik"]
+    #    strip-traefik:
+    #      stripPrefix:
+    #        prefixes: ["/traefik"]
     strip-resources:
       stripPrefix:
-        prefixes: ["/resources"]
+        prefixes: [ "/resources" ]
     strip-andromeda:
       stripPrefix:
-        prefixes: ["/andromeda"]
+        prefixes: [ "/andromeda" ]
     strip-andromeda-dev:
       stripPrefix:
-        prefixes: ["/dev/andromeda"]
+        prefixes: [ "/dev/andromeda" ]
     strip-nebula:
       stripPrefix:
-        prefixes: ["/nebula"]
+        prefixes: [ "/nebula" ]
     strip-nebula-dev:
       stripPrefix:
-        prefixes: ["/dev/nebula"]
+        prefixes: [ "/dev/nebula" ]
     strip-nebula-front-dev:
       stripPrefix:
-        prefixes: ["/dev/nebula/app/"]
+        prefixes: [ "/dev/nebula/app/" ]
+    strip-hacman:
+      stripPrefix:
+        prefixes: [ "/hacman" ]
+    strip-hacman-dev:
+      stripPrefix:
+        prefixes: [ "/dev/hacman" ]
+    strip-hacman-front-dev:
+      stripPrefix:
+        prefixes: [ "/dev/hacman/app/" ]
+    strip-hacman-test:
+      stripPrefix:
+        prefixes: [ "/hacman/api", "/hacman" ]
+    strip-hacman-front-test:
+      stripPrefix:
+        prefixes: [ "/hacman/app" ]
+    strip-hacman-game-test:
+      stripPrefix:
+        prefixes: [ "/hacman/game" ]
+    strip-hacman-game-dev:
+      stripPrefix:
+        prefixes: [ "/dev/hacman/game" ]
+
+  serversTransports:
+    dev-insecure:
+      insecureSkipVerify: true
