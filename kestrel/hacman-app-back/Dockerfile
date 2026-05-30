@@ -6,14 +6,14 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["hacman-app-back.csproj", "."]
-RUN dotnet restore "hacman-app-back.csproj"
+COPY ["latest/hacman-app-back.csproj", "latest/"]
+RUN dotnet restore "latest/hacman-app-back.csproj"
 COPY . .
-RUN dotnet build "hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "latest/hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "latest/hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

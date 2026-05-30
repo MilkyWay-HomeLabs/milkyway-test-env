@@ -7,13 +7,13 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["hacman-app-front.csproj", "."]
-RUN dotnet restore "hacman-app-front.csproj"
+RUN dotnet restore "latest/hacman-app-front.csproj"
 COPY . .
-RUN dotnet build "hacman-app-front.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "latest/hacman-app-front.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "hacman-app-front.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "latest/hacman-app-front.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
