@@ -1,21 +1,10 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+ENV ASPNETCORE_URLS=http://+:8080
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["latest/hacman-app-back.csproj", "latest/"]
-RUN dotnet restore "latest/hacman-app-back.csproj"
-COPY . .
-RUN dotnet build "latest/hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# Copy pre-built binaries from the 'latest' folder
+COPY latest/ .
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "latest/hacman-app-back.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "hacman-app-back.dll"]
