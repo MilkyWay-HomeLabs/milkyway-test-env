@@ -37,4 +37,8 @@ GRANT ALL PRIVILEGES ON `test_robak`.*     TO `robak`@`%`;
 GRANT ALL PRIVILEGES ON `test_racer`.*     TO `racer`@`%`;
 GRANT ALL PRIVILEGES ON `test_element`.*   TO `element`@`%`;
 
+-- backup user
+CREATE USER IF NOT EXISTS `backup`@`%` IDENTIFIED BY 'REPLACE_WITH_STRONG_PASSWORD';
+GRANT SELECT, SHOW VIEW, TRIGGER, LOCK TABLES ON *.* TO `backup`@`%`;
+
 FLUSH PRIVILEGES;

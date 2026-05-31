@@ -133,7 +133,7 @@ services:
       - mongo-test
     volumes:
       - ./backups:/backups
-      - ./backup/logs:/var/log/mw-backup
+      - ./backups/logs:/var/log/mw-backup
     env_file:
       - ./env/db/mariadb.env
       - ./env/db/postgres.env
