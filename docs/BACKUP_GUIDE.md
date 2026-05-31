@@ -42,11 +42,12 @@ Notes:
 How to set it quickly (on the host):
 
 ```bash
-# append current host uid/gid to the env file used by the service
-printf "BACKUP_OWNER_UID=%s\nBACKUP_OWNER_GID=%s\n" "$(id -u)" "$(id -g)" >> /home/wolf/MilkyWayHomeLab/repo/env/milkyway-test-env/env/backup/.env
+# append current host uid/gid to the env file used by the service (use path relative to your repo)
+printf "BACKUP_OWNER_UID=%s\\nBACKUP_OWNER_GID=%s\\n" "$(id -u)" "$(id -g)" >> env/backup/.env
 
 # then recreate the backup container so it picks up the new env
-cd /home/wolf/MilkyWayHomeLab/repo/env/milkyway-test-env
+# run this from the directory that contains your docker-compose.yml
+cd <path-to-repo>/milkyway-test-env
 docker compose up -d --no-deps --force-recreate backup-test
 ```
 
