@@ -24,6 +24,33 @@ Configure credentials in `env/db/*.env` (or the env files referenced in `docker-
 
 For Restic, use `env/backup/restic.env` and keep `RESTIC_PASSWORD` secret (prefer Docker secrets or a protected file).
 
+## Ownership of backup files (host UID/GID)
+
+The backup container writes dumps to `/backups` inside the container which is typically a bind mount to the host `./backups` directory. To ensure files created by the container are owned by the desired host user, set the following environment variables for the `backup-test` service (in `env/backup/.env` or the env file you use in `docker-compose.yml`):
+
+```
+BACKUP_OWNER_UID=1000
+BACKUP_OWNER_GID=1000
+```
+
+Notes:
+- The script expects the numeric names `BACKUP_OWNER_UID` and `BACKUP_OWNER_GID` (not `BACKUP_OWNER_USER_ID` / `BACKUP_OWNER_GROP_ID`). If you have typos in your `.env` (e.g. `BACKUP_OWNER_USER_ID` or `BACKUP_OWNER_GROP_ID`) rename them to the correct variable names above.
+- If `BACKUP_OWNER_UID`/`GID` are provided, the script will chown the whole backup directory to those numeric IDs after the run. This is the most reliable approach.
+- If you prefer not to set numeric IDs, the script also supports `BACKUP_OWNER_USER` (a username). It will try to resolve that username inside the container; however, in many setups that username does not exist inside the container, so resolving by UID/GID is preferred.
+- As a final fallback the script will attempt to detect the owner of the mounted `BACKUP_DIR` using `stat -c '%u:%g' "$BACKUP_DIR"` and use those numbers as the owner. This only works when the directory is a host bind‑mount and the mount metadata exposes the host UID/GID.
+
+How to set it quickly (on the host):
+
+```bash
+# append current host uid/gid to the env file used by the service
+printf "BACKUP_OWNER_UID=%s\nBACKUP_OWNER_GID=%s\n" "$(id -u)" "$(id -g)" >> /home/wolf/MilkyWayHomeLab/repo/env/milkyway-test-env/env/backup/.env
+
+# then recreate the backup container so it picks up the new env
+cd /home/wolf/MilkyWayHomeLab/repo/env/milkyway-test-env
+docker compose up -d --no-deps --force-recreate backup-test
+```
+
+
 ## PostgreSQL: permissions & best practice
 `pg_dump` requires read access to tables and sequences. Recommended approaches:
 

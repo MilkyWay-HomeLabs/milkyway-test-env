@@ -29,25 +29,48 @@ BACKUP_DIR=${BACKUP_DIR:-/backups}
 KEEP_DAYS=${KEEP_DAYS:-28}
 TIMESTAMP=$(date +%F_%H-%M-%S)
 
-# Resolve backup owner if username provided
-# If BACKUP_OWNER_UID not set but BACKUP_OWNER_USER is set, try to resolve uid/gid inside the container
-if [ -n "${BACKUP_OWNER_USER:-}" ] && [ -z "${BACKUP_OWNER_UID:-}" ]; then
-  if command -v id >/dev/null 2>&1 && id -u "$BACKUP_OWNER_USER" >/dev/null 2>&1; then
-    BACKUP_OWNER_UID=$(id -u "$BACKUP_OWNER_USER")
-    BACKUP_OWNER_GID=$(id -g "$BACKUP_OWNER_USER")
-    log "Resolved BACKUP_OWNER_USER='$BACKUP_OWNER_USER' -> ${BACKUP_OWNER_UID}:${BACKUP_OWNER_GID}"
-  else
-    log "WARN: BACKUP_OWNER_USER='$BACKUP_OWNER_USER' not found in container. Please set BACKUP_OWNER_UID and BACKUP_OWNER_GID in env (host UID/GID)."
+log(){ echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $*" | tee -a "$BACKUP_DIR/logs/backup-$TIMESTAMP.log"; }
+
+# Resolve backup owner: prefer numeric UID/GID, then BACKUP_OWNER_USER in container, then detect host mount owner of BACKUP_DIR
+if [ -n "${BACKUP_OWNER_UID:-}" ]; then
+  BACKUP_OWNER_GID=${BACKUP_OWNER_GID:-$BACKUP_OWNER_UID}
+  log "Using provided BACKUP_OWNER_UID=${BACKUP_OWNER_UID} BACKUP_OWNER_GID=${BACKUP_OWNER_GID}"
+else
+  if [ -n "${BACKUP_OWNER_USER:-}" ]; then
+    if command -v id >/dev/null 2>&1 && id -u "$BACKUP_OWNER_USER" >/dev/null 2>&1; then
+      BACKUP_OWNER_UID=$(id -u "$BACKUP_OWNER_USER")
+      BACKUP_OWNER_GID=$(id -g "$BACKUP_OWNER_USER")
+      log "Resolved BACKUP_OWNER_USER='$BACKUP_OWNER_USER' -> ${BACKUP_OWNER_UID}:${BACKUP_OWNER_GID}"
+    else
+      log "WARN: BACKUP_OWNER_USER='$BACKUP_OWNER_USER' not found in container, will try to detect host mount owner"
+    fi
   fi
-fi
-# Ensure BACKUP_OWNER_GID mirrors UID if only UID set
-if [ -n "${BACKUP_OWNER_UID:-}" ] && [ -z "${BACKUP_OWNER_GID:-}" ]; then
-  BACKUP_OWNER_GID=$BACKUP_OWNER_UID
+
+  # Fallback: detect owner of the mounted BACKUP_DIR (host owner visible from container)
+  if [ -z "${BACKUP_OWNER_UID:-}" ]; then
+    if [ -d "${BACKUP_DIR:-/backups}" ]; then
+      owner=$(stat -c '%u:%g' "${BACKUP_DIR}" 2>/dev/null || true)
+      if [ -n "$owner" ]; then
+        uid=${owner%%:*}
+        gid=${owner##*:}
+        if [ -n "$uid" ]; then
+          BACKUP_OWNER_UID=${BACKUP_OWNER_UID:-$uid}
+          BACKUP_OWNER_GID=${BACKUP_OWNER_GID:-$gid}
+          log "Detected host mount owner for ${BACKUP_DIR}: ${BACKUP_OWNER_UID}:${BACKUP_OWNER_GID}"
+        fi
+      fi
+    else
+      log "WARN: BACKUP_DIR ${BACKUP_DIR} not present; cannot auto-detect host owner"
+    fi
+  fi
+
+  # Ensure GID mirrors UID if only UID set
+  if [ -n "${BACKUP_OWNER_UID:-}" ] && [ -z "${BACKUP_OWNER_GID:-}" ]; then
+    BACKUP_OWNER_GID=$BACKUP_OWNER_UID
+  fi
 fi
 
 mkdir -p "$BACKUP_DIR/mariadb" "$BACKUP_DIR/postgres" "$BACKUP_DIR/mongo" "$BACKUP_DIR/logs"
-
-log(){ echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $*" | tee -a "$BACKUP_DIR/logs/backup-$TIMESTAMP.log"; }
 
 # --- MariaDB ---
 if [ -n "${MARIADB_HOST:-}" ]; then
