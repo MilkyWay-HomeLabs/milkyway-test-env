@@ -67,7 +67,7 @@ http:
       rule: "Host(`milkyway.test`) && (PathPrefix(`/hacman/api`) || PathPrefix(`/hacman/swagger`))"
       entryPoints: ["https"]
       service: "hacman-test-svc"
-      middlewares: ["strip-hacman-test"]
+      middlewares: ["strip-hacman"]
       priority: 150
       tls: {}
 
