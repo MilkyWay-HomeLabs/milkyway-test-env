@@ -275,6 +275,8 @@ services:
       - ASPNETCORE_URLS=http://+:8080
     env_file:
       - env/kestrel/hacman/front/.env
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
     networks:
       proxy:
         ipv4_address: 172.21.0.43
