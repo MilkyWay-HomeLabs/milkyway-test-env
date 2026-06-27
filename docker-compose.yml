@@ -133,7 +133,7 @@ services:
       - mongo-test
     volumes:
       - ./backups:/backups
-      - ./backup/logs:/var/log/mw-backup
+      - ./backups/logs:/var/log/mw-backup
     env_file:
       - ./env/db/mariadb.env
       - ./env/db/postgres.env
@@ -273,6 +273,10 @@ services:
       - hacman-app-back
     environment:
       - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - env/kestrel/hacman/front/.env
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
     networks:
       proxy:
         ipv4_address: 172.21.0.43

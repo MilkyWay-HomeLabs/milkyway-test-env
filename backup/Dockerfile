@@ -16,13 +16,24 @@ RUN set -eux; \
       gzip \
       bzip2 \
       gnupg \
-      default-mysql-client \
-      postgresql-client; \
+      wget \
+      default-mysql-client; \
     rm -rf /var/lib/apt/lists/*
 
 # MongoDB client tools (mongodump/mongorestore) copied from official mongo image
 COPY --from=mongo_tools /usr/bin/mongodump /usr/local/bin/mongodump
 COPY --from=mongo_tools /usr/bin/mongorestore /usr/local/bin/mongorestore
+
+# Add PostgreSQL APT repository and install postgresql-client-16 (compatible with Debian bookworm)
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gnupg wget ca-certificates; \
+    wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+      > /etc/apt/sources.list.d/pgdg.list; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends postgresql-client-16; \
+    rm -rf /var/lib/apt/lists/*
 
 # Install restic (multi-arch)
 RUN set -eux; \
