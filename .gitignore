@@ -19,3 +19,5 @@
 /kestrel/hacman-app-back/
 /kestrel/hacman-app-front/
 /env/kestrel/hacman/back/.env
+/tomcat/archive/nebula-rest-api##4.0.0-PUBLIC/
+/tomcat/archive/andromeda-authorization-server##3.2.0/
