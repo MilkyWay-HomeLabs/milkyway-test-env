@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2026-07-04
+
+### Changed
+- Documented Hacman FE-4 deployment fix for frontend container environment after missing remote `docker compose up`.
+- Added required configuration for `hacman-app-front-test`: `TrustSelfSignedCertificates=true` (recommended) or `HacmanApiInternalUrl=http://hacman-app-back:8080/hacman/api/`.
+- Clarified this is a container env change and does not require Traefik dynamic routing updates.
+
 ## [1.6.0] - 2026-05-30
 
 ### Added
