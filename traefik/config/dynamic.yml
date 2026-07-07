@@ -212,6 +212,15 @@ http:
     nebula-front-test-svc:
       loadBalancer:
         servers: [ { url: "http://nebula-front-app-test:80" } ]
+    chess-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://tomcat-test-chess:8080" } ]
+    chess-game-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://chess-game-app-test:80" } ]
+    chess-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://chess-front-app-test:80" } ]
     hacman-test-svc:
       loadBalancer:
         servers: [ { url: "http://hacman-app-back:8080" } ]
