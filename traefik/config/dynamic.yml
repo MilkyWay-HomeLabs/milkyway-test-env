@@ -41,6 +41,36 @@ http:
       middlewares: [ "strip-resources" ]
       tls: { }
 
+    # --- CHESS APP (TEST) ---
+    chess-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/chess/game/`)"
+      entryPoints: [ "https" ]
+      service: "chess-game-test-svc"
+      #      middlewares: [ "strip-hacman-game-test" ]
+      tls: { }
+
+    chess-front-test-static:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/chess/app/lib/`) || PathPrefix(`/chess/app/css/`) || PathPrefix(`/chess/app/js/`) || PathPrefix(`/chess/app/_framework/`) || PathPrefix(`/chess/app/app.`) || PathPrefix(`/chess/app/hacman-app-front.`) || Path(`/chess/app/favicon.png`))"
+      entryPoints: [ "https" ]
+      service: "chess-front-test-svc"
+      priority: 200
+      tls: { }
+
+    chess-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/chess/app/`)"
+      entryPoints: [ "https" ]
+      service: "chess-front-test-svc"
+      priority: 100
+      tls: { }
+
+    chess-api-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/chess/api`) || PathPrefix(`/chess/swagger`))"
+      entryPoints: ["https"]
+      service: "chess-test-svc"
+      middlewares: ["strip-chess"]
+      priority: 150
+      tls: {}
+
     # --- HACMAN APP (TEST) ---
     hacman-game-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/game/`)"
@@ -102,6 +132,26 @@ http:
       tls: { }
 
     # --- DEVELOPMENT ENVIRONMENT ---
+
+    chess-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/game/`)"
+      entryPoints: [ "https" ]
+      service: "chess-game-dev-svc"
+      #      middlewares: [ "strip-hacman-game-dev" ]
+      tls: { }
+
+    chess-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/app`)"
+      entryPoints: ["https"]
+      service: "chess-front-dev-svc"
+      tls: {}
+
+    chess-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/api`)"
+      entryPoints: [ "https" ]
+      service: "chess-dev-svc"
+      middlewares: [ "strip-chess-dev" ]
+      tls: { }
 
     hacman-game-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/game/`)"
@@ -192,6 +242,12 @@ http:
     hacman-game-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5175" } ]
+    chess-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:8447" } ]
+    chess-front-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5177" } ]
 
   middlewares:
     #    strip-traefik:
@@ -215,6 +271,15 @@ http:
     strip-nebula-front-dev:
       stripPrefix:
         prefixes: [ "/dev/nebula/app/" ]
+    strip-chess:
+      stripPrefix:
+        prefixes: [ "/chess" ]
+    strip-chess-dev:
+      stripPrefix:
+        prefixes: [ "/dev/chess" ]
+    strip-chess-front-dev:
+      stripPrefix:
+        prefixes: [ "/dev/chess/app/" ]
     strip-hacman:
       stripPrefix:
         prefixes: [ "/hacman" ]

@@ -292,6 +292,29 @@ services:
       proxy:
         ipv4_address: 172.21.0.44
 
+  tomcat-test-chess:
+    image: tomcat:10.1-jdk25-temurin
+    container_name: tomcat-test-chess
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+      - IMAGE_AVATAR_PATH=/app/fileserver/chess/avatars
+    volumes:
+      - ./tomcat/app/chess-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/chess/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/chess-rest.properties:/usr/local/tomcat/conf/chess-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.14
+      internal:
+        ipv4_address: 172.22.0.14
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
 volumes:
   prometheus-data:
     driver: local
