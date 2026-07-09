@@ -63,8 +63,15 @@ http:
       priority: 100
       tls: { }
 
+    chess-swagger-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/chess/swagger-ui`) || PathPrefix(`/chess/v3/api-docs`))"
+      entryPoints: [ "https" ]
+      service: "chess-test-svc"
+      #      middlewares: ["strip-nebula"]
+      tls: { }
+
     chess-api-test:
-      rule: "Host(`milkyway.test`) && (PathPrefix(`/chess/api`) || PathPrefix(`/chess/swagger`))"
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/chess/api`)"
       entryPoints: ["https"]
       service: "chess-test-svc"
       middlewares: ["strip-chess"]
