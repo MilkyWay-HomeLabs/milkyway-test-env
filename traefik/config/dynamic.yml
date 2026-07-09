@@ -71,19 +71,19 @@ http:
       tls: { }
 
     chess-api-test:
-      rule: "Host(`milkyway.test`) && (PathPrefix(`/chess/api`)"
-      entryPoints: ["https"]
+      rule: "Host(`milkyway.test`) && PathPrefix(`/chess/api`)"
+      entryPoints: [ "https" ]
       service: "chess-test-svc"
-      middlewares: ["strip-chess"]
+      middlewares: [ "strip-chess" ]
       priority: 150
-      tls: {}
+      tls: { }
 
     # --- HACMAN APP (TEST) ---
     hacman-game-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/hacman/game/`)"
       entryPoints: [ "https" ]
       service: "hacman-game-test-svc"
-#      middlewares: [ "strip-hacman-game-test" ]
+      #      middlewares: [ "strip-hacman-game-test" ]
       tls: { }
 
     hacman-front-test-static:
@@ -102,11 +102,11 @@ http:
 
     hacman-api-test:
       rule: "Host(`milkyway.test`) && (PathPrefix(`/hacman/api`) || PathPrefix(`/hacman/swagger`))"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "hacman-test-svc"
-      middlewares: ["strip-hacman"]
+      middlewares: [ "strip-hacman" ]
       priority: 150
-      tls: {}
+      tls: { }
 
     # --- NEBULA APP (TEST) ---
     nebula-front-test:
@@ -149,9 +149,9 @@ http:
 
     chess-front-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/app`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "chess-front-dev-svc"
-      tls: {}
+      tls: { }
 
     chess-api-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/api`)"
@@ -164,14 +164,14 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/game/`)"
       entryPoints: [ "https" ]
       service: "hacman-game-dev-svc"
-#      middlewares: [ "strip-hacman-game-dev" ]
+      #      middlewares: [ "strip-hacman-game-dev" ]
       tls: { }
 
     hacman-front-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/app`)"
-      entryPoints: ["https"]
+      entryPoints: [ "https" ]
       service: "hacman-front-dev-svc"
-      tls: {}
+      tls: { }
 
     hacman-api-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/hacman/api`)"
