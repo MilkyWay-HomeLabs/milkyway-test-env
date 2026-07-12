@@ -24,13 +24,13 @@ services:
       - host.docker.internal:host-gateway
     labels:
       - "traefik.enable=true"
-#      - "traefik.http.routers.dashboard.rule=Host(`milkyway.test`) && PathPrefix(`/traefik`)"
-#      - "traefik.http.routers.dashboard.entrypoints=https"
-#      - "traefik.http.routers.dashboard.tls=true"
-#      - "traefik.http.routers.dashboard.service=api@internal"
-#      - "traefik.http.routers.dashboard.middlewares=auth,strip-traefik"
-#      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
-#      - "traefik.http.middlewares.strip-traefik.stripprefix.prefixes=/traefik"
+  #      - "traefik.http.routers.dashboard.rule=Host(`milkyway.test`) && PathPrefix(`/traefik`)"
+  #      - "traefik.http.routers.dashboard.entrypoints=https"
+  #      - "traefik.http.routers.dashboard.tls=true"
+  #      - "traefik.http.routers.dashboard.service=api@internal"
+  #      - "traefik.http.routers.dashboard.middlewares=auth,strip-traefik"
+  #      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+  #      - "traefik.http.middlewares.strip-traefik.stripprefix.prefixes=/traefik"
 
   prometheus:
     image: prom/prometheus:v3.9.1
@@ -314,6 +314,17 @@ services:
         ipv4_address: 172.22.0.14
     extra_hosts:
       - "milkyway.test:172.21.0.2"
+
+  chess-front-app-test:
+    build: ./nginx/chess-front-app
+    image: milkyway/chess-front-app-test:local
+    container_name: chess-front-app-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/chess/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.45
 
 volumes:
   prometheus-data:
