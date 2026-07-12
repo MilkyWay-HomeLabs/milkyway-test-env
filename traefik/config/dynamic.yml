@@ -46,7 +46,7 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/chess/game/`)"
       entryPoints: [ "https" ]
       service: "chess-game-test-svc"
-      #      middlewares: [ "strip-hacman-game-test" ]
+      middlewares: [ "strip-chess-game-test" ]
       tls: { }
 
     chess-front-test-static:
@@ -144,7 +144,7 @@ http:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/game/`)"
       entryPoints: [ "https" ]
       service: "chess-game-dev-svc"
-      #      middlewares: [ "strip-hacman-game-dev" ]
+      middlewares: [ "strip-chess-game-dev" ]
       tls: { }
 
     chess-front-dev:
@@ -224,7 +224,7 @@ http:
         servers: [ { url: "http://tomcat-test-chess:8080" } ]
     chess-game-test-svc:
       loadBalancer:
-        servers: [ { url: "http://chess-game-app-test:80" } ]
+        servers: [ { url: "http://chess-game-front-test:80" } ]
     chess-front-test-svc:
       loadBalancer:
         servers: [ { url: "http://chess-front-app-test:80" } ]
@@ -264,6 +264,9 @@ http:
     chess-front-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5177" } ]
+    chess-game-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5175" } ]
 
   middlewares:
     #    strip-traefik:
@@ -317,6 +320,10 @@ http:
     strip-hacman-game-dev:
       stripPrefix:
         prefixes: [ "/dev/hacman/game" ]
+    strip-chess-game-test:
+      stripPrefix: { prefixes: [ "/chess/game" ] }
+    strip-chess-game-dev:
+      stripPrefix: { prefixes: [ "/dev/chess/game" ] }
 
   serversTransports:
     dev-insecure:

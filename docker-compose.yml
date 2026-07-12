@@ -118,7 +118,7 @@ services:
         ipv4_address: 172.21.0.8
     volumes:
       - ../../../resources/test:/usr/share/nginx/html:ro
-      - ./fileserver-test/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./fileserver-test/django.conf:/etc/nginx/django.conf:ro
     labels:
       - "traefik.enable=false"
 
@@ -323,10 +323,23 @@ services:
       - env/nginx/chess/.env
     volumes:
       - ./nginx/chess-front-app/dist:/usr/share/nginx/html/chess/app:ro
-      - ./nginx/chess-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/chess-front-app/django.conf:/etc/nginx/django.conf:ro
     networks:
       proxy:
         ipv4_address: 172.21.0.45
+
+  chess-game-front:
+    build: django/chess-game-front
+    image: milkyway/chess-game-front-test:local
+    container_name: chess-game-front-test
+    restart: unless-stopped
+    env_file:
+      - env/django/chess/.env
+    volumes:
+      - ./data/chess/db.sqlite3:/app/db.sqlite3
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.46
 
 volumes:
   prometheus-data:

@@ -182,7 +182,7 @@ This is a short, practical cheat-sheet with the most commonly used Docker and Do
 - Check files inside a container:
   ```bash
   docker exec -it <container> ls -la /usr/share/nginx/html
-  docker exec -it <container> cat /etc/nginx/nginx.conf
+  docker exec -it <container> cat /etc/nginx/django.conf
   ```
 - Named volumes keep data across container recreation — avoid `down --volumes` if you want to preserve DBs or uploads.
 
