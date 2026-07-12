@@ -316,12 +316,14 @@ services:
       - "milkyway.test:172.21.0.2"
 
   chess-front-app-test:
-    build: ./nginx/chess-front-app
-    image: milkyway/chess-front-app-test:local
+    image: nginx:alpine
     container_name: chess-front-app-test
     restart: unless-stopped
     env_file:
       - env/nginx/chess/.env
+    volumes:
+      - ./nginx/chess-front-app/dist:/usr/share/nginx/html/chess/app:ro
+      - ./nginx/chess-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       proxy:
         ipv4_address: 172.21.0.45
