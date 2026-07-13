@@ -23,3 +23,5 @@
 /tomcat/archive/andromeda-authorization-server##3.2.0/
 /env/tomcat/chess-rest.properties
 /env/django/chess/.env
+/env/nginx/robak-front/.env
+/env/nginx/robak-game/.env

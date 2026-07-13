@@ -329,17 +329,70 @@ services:
         ipv4_address: 172.21.0.45
 
   chess-game-front:
-    build: django/chess-game-front
+    build:
+      context: django/chess-game-front
+      args:
+        STOCKFISH_VERSION: sf_18
+        STOCKFISH_VARIANT: x86-64-avx2
     image: milkyway/chess-game-front-test:local
     container_name: chess-game-front-test
     restart: unless-stopped
     env_file:
       - env/django/chess/.env
-    volumes:
-      - ./data/chess/db.sqlite3:/app/db.sqlite3
     networks:
       proxy:
         ipv4_address: 172.21.0.46
+
+  tomcat-test-robak:
+    image: tomcat:10.1-jdk25-temurin
+    container_name: tomcat-test-robak-front
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+      - IMAGE_AVATAR_PATH=/app/fileserver/robak-front/avatars
+    volumes:
+      - ./tomcat/app/robak-front-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/robak-front/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/robak-front-rest.properties:/usr/local/tomcat/conf/robak-front-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.15
+      internal:
+        ipv4_address: 172.22.0.15
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  robak-front-app-test:
+    image: nginx:alpine
+    container_name: robak-front-app-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/robak-front/.env
+    volumes:
+      - ./nginx/robak-front-app/dist:/usr/share/nginx/html/robak/app:ro
+      - ./nginx/robak-front-app/django.conf:/etc/nginx/django.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.47
+
+  robak-game-app-test:
+    build:
+      context: django/robak-game-app-test
+      args:
+        STOCKFISH_VERSION: sf_18
+        STOCKFISH_VARIANT: x86-64-avx2
+    image: milkyway/robak-game-app-test:local
+    container_name: robak-game-app-test
+    restart: unless-stopped
+    env_file:
+      - env/django/robak-game/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.48
 
 volumes:
   prometheus-data:

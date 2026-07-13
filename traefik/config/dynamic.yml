@@ -41,6 +41,43 @@ http:
       middlewares: [ "strip-resources" ]
       tls: { }
 
+    # --- ROBAK APP (TEST) ---
+    robak-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/robak-front/game/`)"
+      entryPoints: [ "https" ]
+      service: "robak-front-game-test-svc"
+      middlewares: [ "strip-robak-front-game-test" ]
+      tls: { }
+
+    robak-front-test-static:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/robak-front/app/lib/`) || PathPrefix(`/robak-front/app/css/`) || PathPrefix(`/robak-front/app/js/`) || PathPrefix(`/robak-front/app/_framework/`) || PathPrefix(`/robak-front/app/app.`) || PathPrefix(`/robak-front/app/hacman-app-front.`) || Path(`/robak-front/app/favicon.png`))"
+      entryPoints: [ "https" ]
+      service: "robak-front-front-test-svc"
+      priority: 200
+      tls: { }
+
+    robak-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/robak-front/app/`)"
+      entryPoints: [ "https" ]
+      service: "robak-front-front-test-svc"
+      priority: 100
+      tls: { }
+
+    robak-swagger-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/robak-front/swagger-ui`) || PathPrefix(`/robak-front/v3/api-docs`))"
+      entryPoints: [ "https" ]
+      service: "robak-front-test-svc"
+      #      middlewares: ["strip-nebula"]
+      tls: { }
+
+    robak-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/robak-front/api`)"
+      entryPoints: [ "https" ]
+      service: "robak-front-test-svc"
+      middlewares: [ "strip-robak-front" ]
+      priority: 150
+      tls: { }
+
     # --- CHESS APP (TEST) ---
     chess-game-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/chess/game/`)"
@@ -140,6 +177,26 @@ http:
 
     # --- DEVELOPMENT ENVIRONMENT ---
 
+    robak-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/robak-front/game/`)"
+      entryPoints: [ "https" ]
+      service: "robak-front-game-dev-svc"
+      middlewares: [ "strip-robak-front-game-dev" ]
+      tls: { }
+
+    robak-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/robak-front/app`)"
+      entryPoints: [ "https" ]
+      service: "robak-front-front-dev-svc"
+      tls: { }
+
+    robak-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/robak-front/api`)"
+      entryPoints: [ "https" ]
+      service: "robak-front-dev-svc"
+      middlewares: [ "strip-robak-front-dev" ]
+      tls: { }
+
     chess-game-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/game/`)"
       entryPoints: [ "https" ]
@@ -237,6 +294,16 @@ http:
     hacman-game-test-svc:
       loadBalancer:
         servers: [ { url: "http://hacman-game-app-test:80" } ]
+    robak-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://tomcat-test-robak:8080" } ]
+    robak-game-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://robak-game-front-test:80" } ]
+    robak-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://robak-front-app-test:80" } ]
+
     # Dev endpoints
     andromeda-dev-svc:
       loadBalancer:
@@ -267,6 +334,15 @@ http:
     chess-game-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5175" } ]
+    robak-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:8448" } ]
+    robak-front-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5178" } ]
+    robak-game-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5176" } ]
 
   middlewares:
     #    strip-traefik:
@@ -324,6 +400,19 @@ http:
       stripPrefix: { prefixes: [ "/chess/game" ] }
     strip-chess-game-dev:
       stripPrefix: { prefixes: [ "/dev/chess/game" ] }
+    strip-robak:
+      stripPrefix:
+        prefixes: [ "/robak-front" ]
+    strip-robak-dev:
+      stripPrefix:
+        prefixes: [ "/dev/robak-front" ]
+    strip-robak-front-dev:
+      stripPrefix:
+        prefixes: [ "/dev/robak-front/app/" ]
+    strip-robak-game-test:
+      stripPrefix: { prefixes: [ "/robak-front/game" ] }
+    strip-robak-game-dev:
+      stripPrefix: { prefixes: [ "/dev/robak-front/game" ] }
 
   serversTransports:
     dev-insecure:
