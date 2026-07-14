@@ -76,7 +76,9 @@ docker-compose.yml       22 services, three networks
 env/                     configuration and secrets — gitignored; *.example is committed
 sql/                     schema + seed — applied ONLY to an empty database volume
 traefik/                 traefik.yml (static) + config/dynamic.yml (hot-reloaded)
-nginx/ kestrel/ django/  per-app build contexts and built bundles
+nginx/ kestrel/ django/  one directory per container, named after it:
+                           nginx/chess-front/{nginx.conf,dist/,archive/} -> chess-front-test
+                           dist/ and archive/ are gitignored build output
 tomcat/                  WARs and setenv scripts
 backup/ backups/         the backup image, and its output (gitignored — holds real data)
 prometheus/ loki/ promtail/

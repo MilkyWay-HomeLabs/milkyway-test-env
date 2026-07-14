@@ -64,3 +64,33 @@ Infrastructure: `traefik-test`, `prometheus-test`, `grafana-test`, `loki-test`,
    `traefik/config/dynamic.yml`, `prometheus/prometheus.yml`, the `*.properties` files
    and the hacman connection string. Renaming a container means grepping for the old name
    across all of them — see `docs/MIGRATION.md` for the checklist.
+
+## Directories follow the containers
+
+A container's build context and assets live in a directory with **the same name**, minus
+the `-test` suffix:
+
+```
+nginx/chess-front/          ->  chess-front-test
+  Dockerfile, nginx.conf         (source — committed)
+  dist/                          (current bundle — gitignored)
+  archive/                       (superseded bundles — gitignored)
+
+nginx/nebula-front/  nginx/hacman-game/  nginx/robak-front/  nginx/robak-game/
+
+django/chess-game/          ->  chess-game-test
+  app/                           (the application, its own git checkout — gitignored)
+  archive/                       (superseded builds — gitignored)
+```
+
+This replaced ten sibling directories — `chess-front-app` next to `chess-front-archive`,
+and so on — where the pairing was implied by a suffix and no directory name matched any
+container. Now there is one name: the container, its directory, its DNS name.
+
+`django/chess-game` carries one extra level because `app/` is a git checkout of its own.
+The archive sits *beside* it, not inside it, so it does not pollute that repository.
+
+**Archives are gitignored, and must stay that way.** A 230 MB bundle tarball reached the
+initial commit through a gap in the ignore rules. GitHub rejects any file over 100 MB, so
+the push would have failed outright — and the repository had already grown to 238 MB. It
+is now 5.8 MB.
