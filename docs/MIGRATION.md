@@ -149,5 +149,7 @@ and a new, empty set of volumes.
   `prometheus.yml` all use the new names.
 - **Restic and TLS** rotation, deliberately deferred — both have failure modes worse than
   the leak (unreadable snapshots; a re-trust dance on every client).
-- **CI.** None exists. Choose GitHub Actions or Jenkins as a separate decision — not as
-  part of a migration that already moves secrets, names, networks and repo layout.
+- **CI.** GitHub Actions, decided 2026-07-14. No workflows exist yet. The stray
+  `Jenkinsfile` in `chess-game-front` is from an abandoned setup — ignore it, and do not
+  build against it. See `docs/SECRETS.md` § CI for which secrets a pipeline would need
+  (the database passwords are not among them).

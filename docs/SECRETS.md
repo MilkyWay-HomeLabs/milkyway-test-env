@@ -90,12 +90,27 @@ secret — anyone who cloned, forked, or scraped the repo still has the old valu
 thing that helps is rotation, which is why every value in the master file has an `old` and
 a `new` column.
 
-## CI
+## CI — GitHub Actions
 
-There is no CI pipeline today, so **none of these is currently a GitHub Actions or Jenkins
-secret**. The master file's `ci` column marks which ones *would* be needed by a build
-pipeline (`ci-candidate`) versus which are purely runtime (`not-needed` — all the database
-passwords; CI builds artifacts, it does not connect to the test databases).
+**GitHub Actions is the CI platform.** Any `Jenkinsfile` still lying around in an
+application repo (there is one in `chess-game-front`) is dead weight from an earlier setup
+— do not treat it as the pipeline, and do not add secrets to a Jenkins credential store.
 
-When a CI platform is chosen, the master file is the source list for either. Do not paste
-these values into a pipeline before that decision is made.
+There are no workflows yet, so **nothing here is currently a live Actions secret**. The
+master file's `ci` column marks which ones *would* be needed once a pipeline exists:
+
+- **`ci-candidate`** — needed to *build* an app: `APP_JWT_SECRET`,
+  `SPRING_SECURITY_PASSWORD`, `AUTH_MAIL_PASSWORD`, `DJANGO_SECRET_KEY`, and the
+  front-end `VITE_*` / `REACT_APP_*` values that get baked into bundles.
+- **`not-needed`** — every database password. CI builds artifacts; it does not connect to
+  the test databases. If an integration-test job ever needs one, give it a throwaway
+  database with its own password. Never these.
+
+Set them per application repository:
+
+```bash
+gh secret set APP_JWT_SECRET --repo MilkyWay-HomeLabs/<app-repo>
+```
+
+The environment's own runtime secrets (everything under `env/`) are delivered by files on
+this host, not by CI. A pipeline never needs them.
