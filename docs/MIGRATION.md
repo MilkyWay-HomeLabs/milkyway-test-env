@@ -51,12 +51,13 @@ SHA-256 for every artifact:
 against their existing volumes with row counts verified against the pre-migration
 snapshot, and the segmentation was tested end to end (see "What the cutover found").
 
-Two things make the cutover safe, and both are worth understanding before you run it:
+Two things made the cutover safe, and both are worth understanding if you ever repeat a
+rename like this:
 
-**1. Transitional network aliases.** Every renamed container carries an `aliases:` entry
-for its old DNS name. `traefik/config/dynamic.yml` still says
-`http://tomcat-test-nebula:8080` — and that keeps resolving after the rename, because
-`nebula-rest-test` also answers to `tomcat-test-nebula`. Nothing 502s mid-rename.
+**1. Transitional network aliases.** Every renamed container temporarily carried an
+`aliases:` entry for its old DNS name, so `dynamic.yml` (still saying
+`http://tomcat-test-nebula:8080`) kept resolving through the rename and nothing 502'd.
+They have since been removed, now that every config file uses the new names.
 
 **2. `dynamic.yml` is hot-reloaded** (`watch: true` in `traefik.yml`). Editing it takes
 effect *immediately*, on the running Traefik, with no recreate. Do not update the
@@ -145,8 +146,6 @@ and a new, empty set of volumes.
   password should be revoked at Google *first*, independently of everything else here.
   See `docs/SECRETS.md` and the master file.
 - **Chess → Nebula auth.** Until then, `chess-rest-test` keeps its `auth-net` membership.
-- **Remove the transitional aliases** once `dynamic.yml`, the properties and
-  `prometheus.yml` all use the new names.
 - **Restic and TLS** rotation, deliberately deferred — both have failure modes worse than
   the leak (unreadable snapshots; a re-trust dance on every client).
 - **CI.** GitHub Actions, decided 2026-07-14. No workflows exist yet. The stray
