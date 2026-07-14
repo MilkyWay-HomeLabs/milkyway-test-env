@@ -1,0 +1,200 @@
+# Ready-to-paste compose blocks for the three planned applications.
+#
+# NOT loaded by docker compose. Copy a block into ../../docker-compose.yml when the
+# application's artifacts exist, and follow docs/future/ADDING-AN-APP.md.
+#
+# Note what is deliberately absent from every block below: auth-net. A REST API
+# authenticates through Nebula, never against Andromeda directly. Adding auth-net here
+# would silently reintroduce the coupling this architecture exists to prevent.
+#
+# Do not enable a Tomcat service before its WAR exists on disk. Docker will happily
+# create a *directory* where the file should be, and Tomcat will restart-loop against it.
+
+services:
+
+  # ======================= ELEMENT (.150) =======================
+  # MariaDB `test_element` and user `element` already exist; set the password first.
+
+  element-rest-test:
+    image: tomcat:10.1-jdk25-temurin
+    container_name: element-rest-test
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    volumes:
+      - ./tomcat/app/element-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/element/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/element-rest.properties:/usr/local/tomcat/conf/element-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.150
+      internal:
+        ipv4_address: 172.22.0.150
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  element-front-test:
+    image: nginx:alpine
+    container_name: element-front-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/element-front/.env
+    volumes:
+      - ./nginx/element-front-app/dist:/usr/share/nginx/html/element/app:ro
+      - ./nginx/element-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.151
+
+  element-game-test:
+    image: nginx:alpine
+    container_name: element-game-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/element-game/.env
+    volumes:
+      - ./nginx/element-game-app/dist:/usr/share/nginx/html/element/game:ro
+      - ./nginx/element-game-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.152
+
+  # ======================== RACER (.160) ========================
+  # MariaDB `test_racer` and user `racer` already exist; set the password first.
+
+  racer-rest-test:
+    image: tomcat:10.1-jdk25-temurin
+    container_name: racer-rest-test
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    volumes:
+      - ./tomcat/app/racer-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/racer/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/racer-rest.properties:/usr/local/tomcat/conf/racer-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.160
+      internal:
+        ipv4_address: 172.22.0.160
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  racer-front-test:
+    image: nginx:alpine
+    container_name: racer-front-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/racer-front/.env
+    volumes:
+      - ./nginx/racer-front-app/dist:/usr/share/nginx/html/racer/app:ro
+      - ./nginx/racer-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.161
+
+  racer-game-test:
+    image: nginx:alpine
+    container_name: racer-game-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/racer-game/.env
+    volumes:
+      - ./nginx/racer-game-app/dist:/usr/share/nginx/html/racer/game:ro
+      - ./nginx/racer-game-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.162
+
+  # ======================= PUZZEL (.170) ========================
+  # Backed by MongoDB (`test_puzzel`), not MariaDB — the only app that is.
+  # Its REST API needs the Mongo connection string in env/tomcat/puzzel-rest.properties,
+  # and the password is PUZZEL_PASSWORD in env/db/mongo.env.
+
+  puzzel-rest-test:
+    image: tomcat:10.1-jdk25-temurin
+    container_name: puzzel-rest-test
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    volumes:
+      - ./tomcat/app/puzzel-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/puzzel/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/puzzel-rest.properties:/usr/local/tomcat/conf/puzzel-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.170
+      internal:
+        ipv4_address: 172.22.0.170
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  puzzel-front-test:
+    image: nginx:alpine
+    container_name: puzzel-front-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/puzzel-front/.env
+    volumes:
+      - ./nginx/puzzel-front-app/dist:/usr/share/nginx/html/puzzel/app:ro
+      - ./nginx/puzzel-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.171
+
+  puzzel-game-test:
+    image: nginx:alpine
+    container_name: puzzel-game-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/puzzel-game/.env
+    volumes:
+      - ./nginx/puzzel-game-app/dist:/usr/share/nginx/html/puzzel/game:ro
+      - ./nginx/puzzel-game-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.172
+
+# ---------------------------------------------------------------------------
+# Traefik routes to add to traefik/config/dynamic.yml, per app <app>:
+#
+#   routers:
+#     <app>-api-test:
+#       rule: "Host(`milkyway.test`) && PathPrefix(`/<app>/api`)"
+#       entryPoints: [ "https" ]
+#       service: "<app>-test-svc"
+#       middlewares: [ "strip-<app>" ]
+#       priority: 150
+#       tls: { }
+#     <app>-front-test:
+#       rule: "Host(`milkyway.test`) && PathPrefix(`/<app>/app/`)"
+#       entryPoints: [ "https" ]
+#       service: "<app>-front-test-svc"
+#       priority: 100
+#       tls: { }
+#     <app>-game-test:
+#       rule: "Host(`milkyway.test`) && PathPrefix(`/<app>/game/`)"
+#       entryPoints: [ "https" ]
+#       service: "<app>-game-test-svc"
+#       tls: { }
+#
+#   services:
+#     <app>-test-svc:       { loadBalancer: { servers: [ { url: "http://<app>-rest-test:8080" } ] } }
+#     <app>-front-test-svc: { loadBalancer: { servers: [ { url: "http://<app>-front-test:80" } ] } }
+#     <app>-game-test-svc:  { loadBalancer: { servers: [ { url: "http://<app>-game-test:80" } ] } }
+#
+#   middlewares:
+#     strip-<app>: { stripPrefix: { prefixes: [ "/<app>" ] } }
+# ---------------------------------------------------------------------------

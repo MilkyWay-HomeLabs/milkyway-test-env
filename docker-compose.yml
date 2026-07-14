@@ -1,0 +1,528 @@
+# MilkyWay Home Lab — test environment
+#
+# Naming convention: <app>-<role>-test, where role is one of rest | front | game
+# (see docs/NAMING.md). The compose service key, the container_name and the DNS
+# name are all the same string — there is exactly one name to remember per container.
+#
+# IP allocation (see docs/ARCHITECTURE.md for the full table):
+#   .2        traefik
+#   .3-.9     infrastructure (monitoring, fileserver, backup)
+#   .30-.39   databases
+#   .100+     applications, one /10 block each:
+#             andromeda .100 | nebula .110 | chess .120 | hacman .130 | robak .140
+#             element .150 | racer .160 | puzzel .170   (reserved)
+#   Within a block: rest = base+0, front = base+1, game = base+2.
+#   A container keeps the same last octet on every network it joins.
+#
+# Networks and who may talk to whom (enforced by membership, not by convention):
+#   proxy     — Traefik and everything it routes to. All HTTP ingress.
+#   internal  — databases, monitoring, backup. Backends reach their DB here.
+#   auth-net  — ONLY andromeda-auth-test and nebula-rest-test.
+#
+#   Andromeda is the authorization server. Only Nebula may talk to it. Every other
+#   backend authenticates through Nebula, and no front-end talks to a backend
+#   directly — fronts go through Traefik. Chess and Robak still hold a direct
+#   Andromeda URL in their properties; that is a known deviation, tracked in
+#   docs/ARCHITECTURE.md, and it stops working the moment they are recreated
+#   without auth-net. Do not recreate them until their app-side change has landed.
+#
+# TRANSITIONAL: every renamed container carries a network alias for its previous
+# name so that traefik/config/dynamic.yml, the *.properties files and
+# prometheus.yml keep resolving during the rename. Remove the `aliases:` blocks
+# once those files have been updated to the new names — see docs/MIGRATION.md.
+
+services:
+  traefik-test:
+    image: traefik:v3.2
+    container_name: traefik-test
+    restart: unless-stopped
+    security_opt:
+      - "no-new-privileges:true"
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.2
+        aliases: [ traefik ]
+      internal:
+        ipv4_address: 172.22.0.2
+        aliases: [ traefik ]
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/config:/config:ro
+      - ./traefik/certs:/certs:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    labels:
+      - "traefik.enable=true"
+
+  # --- MONITORING ---
+
+  prometheus-test:
+    image: prom/prometheus:v3.9.1
+    container_name: prometheus-test
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url=https://milkyway.test/prometheus/'
+    ports:
+      - "9090:9090"
+    networks:
+      internal:
+        ipv4_address: 172.22.0.3
+        aliases: [ prometheus ]
+
+  grafana-test:
+    image: grafana/grafana:11.4.0
+    container_name: grafana-test
+    restart: unless-stopped
+    env_file:
+      - env/grafana/.env
+    environment:
+      - GF_SERVER_ROOT_URL=https://milkyway.test/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      internal:
+        ipv4_address: 172.22.0.4
+        aliases: [ grafana ]
+
+  node-exporter-test:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter-test
+    restart: unless-stopped
+    pid: host
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "9100:9100"
+    networks:
+      internal:
+        ipv4_address: 172.22.0.5
+        aliases: [ node-exporter ]
+
+  loki-test:
+    image: grafana/loki:3.0.0
+    container_name: loki-test
+    restart: unless-stopped
+    command: [ "-config.file=/etc/loki/config.yml" ]
+    volumes:
+      - ./loki/config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      internal:
+        ipv4_address: 172.22.0.6
+        aliases: [ loki ]
+
+  promtail-test:
+    image: grafana/promtail:3.0.0
+    container_name: promtail-test
+    restart: unless-stopped
+    command: [ "-config.file=/etc/promtail/config.yml" ]
+    volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - promtail-positions:/tmp
+    networks:
+      internal:
+        ipv4_address: 172.22.0.7
+        aliases: [ promtail ]
+
+  # --- SHARED INFRASTRUCTURE ---
+
+  fileserver-test:
+    image: nginx:alpine
+    container_name: fileserver-test
+    restart: unless-stopped
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.8
+    volumes:
+      - ../../../resources/test:/usr/share/nginx/html:ro
+      - ./fileserver-test/django.conf:/etc/nginx/django.conf:ro
+    labels:
+      - "traefik.enable=false"
+
+  backup-test:
+    build: ./backup
+    image: milkyway/backup-test:local
+    container_name: backup-test
+    restart: unless-stopped
+    depends_on:
+      - mariadb-test
+      - postgres-test
+      - mongo-test
+    volumes:
+      - ./backups:/backups
+      - ./backups/logs:/var/log/mw-backup
+    env_file:
+      - ./env/db/mariadb.env
+      - ./env/db/postgres.env
+      - ./env/db/mongo.env
+      - ./env/backup/.env
+      - ./env/backup/restic.env
+    networks:
+      internal:
+        ipv4_address: 172.22.0.9
+
+  # --- DATABASES ---
+  # Data lives in named volumes (test_mariadb-data, ...), not in this directory.
+  # Never run `docker compose down -v` against this project.
+
+  mariadb-test:
+    image: mariadb:11
+    container_name: mariadb-test
+    restart: unless-stopped
+    env_file:
+      - env/db/mariadb.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./sql/mariadb:/docker-entrypoint-initdb.d:ro
+    networks:
+      internal:
+        ipv4_address: 172.22.0.31
+        aliases: [ milky-test-mariadb ]
+
+  postgres-test:
+    image: postgres:16
+    container_name: postgres-test
+    restart: unless-stopped
+    env_file:
+      - env/db/postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/postgres:/docker-entrypoint-initdb.d:ro
+    networks:
+      internal:
+        ipv4_address: 172.22.0.32
+        aliases: [ milky-test-postgres ]
+
+  mongo-test:
+    image: mongo:8
+    container_name: mongo-test
+    restart: unless-stopped
+    env_file:
+      - env/db/mongo.env
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./sql/mongo:/docker-entrypoint-initdb.d:ro
+    networks:
+      internal:
+        ipv4_address: 172.22.0.33
+        aliases: [ milky-test-mongo ]
+
+  # --- ANDROMEDA (authorization server) ---
+  # Deliberately NOT on `proxy`: it has no public route. The only container that
+  # can reach it is nebula-rest-test, over auth-net. It stays on `internal` for
+  # its MariaDB connection and for Prometheus scraping.
+
+  andromeda-auth-test:
+    image: tomcat:10.1-jdk21-temurin
+    container_name: andromeda-auth-test
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    volumes:
+      - ./tomcat/app/andromeda-authorization-server##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/andromeda/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/andromeda-authorization.properties:/usr/local/tomcat/conf/andromeda-authorization.properties:ro
+    networks:
+      internal:
+        ipv4_address: 172.22.0.100
+        aliases: [ tomcat-test-andromeda ]
+      auth-net:
+        ipv4_address: 172.23.0.100
+        aliases: [ tomcat-test-andromeda ]
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  # --- NEBULA (SSO gateway: REST + front) ---
+  # The only application allowed on auth-net.
+
+  nebula-rest-test:
+    image: tomcat:10.1-jdk21-temurin
+    container_name: nebula-rest-test
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+      - IMAGE_AVATAR_PATH=/app/fileserver/nebula/avatars
+    volumes:
+      - ./tomcat/app/nebula-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/nebula/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/nebula-rest.properties:/usr/local/tomcat/conf/nebula-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.110
+        aliases: [ tomcat-test-nebula ]
+      internal:
+        ipv4_address: 172.22.0.110
+        aliases: [ tomcat-test-nebula ]
+      auth-net:
+        ipv4_address: 172.23.0.110
+        aliases: [ tomcat-test-nebula ]
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  nebula-front-test:
+    build: ./nginx/nebula-front-app
+    image: milkyway/nebula-front-app-test:local
+    container_name: nebula-front-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/nebula/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.111
+        aliases: [ nebula-front-app-test ]
+
+  # --- CHESS (rest + front + game) ---
+
+  chess-rest-test:
+    image: tomcat:10.1-jdk25-temurin
+    container_name: chess-rest-test
+    restart: unless-stopped
+    env_file:
+      - env/tomcat/.env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1g
+      - IMAGE_AVATAR_PATH=/app/fileserver/chess/avatars
+    volumes:
+      - ./tomcat/app/chess-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./tomcat/setenv/chess/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+      - ./env/tomcat/chess-rest.properties:/usr/local/tomcat/conf/chess-rest.properties:ro
+      - ../../../resources/test:/app/fileserver
+      - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.120
+        aliases: [ tomcat-test-chess ]
+      internal:
+        ipv4_address: 172.22.0.120
+        aliases: [ tomcat-test-chess ]
+      # TEMPORARY EXCEPTION — violates the "only Nebula talks to Andromeda" rule.
+      # Chess REST still calls the authorization server directly
+      # (ANDROMEDA_AUTH_SERV_URL in env/tomcat/chess-rest.properties). Removing this
+      # one block is all it takes to enforce the rule — but do it only after Chess
+      # authenticates through Nebula, otherwise Chess login breaks on next recreate.
+      # Tracked in docs/ARCHITECTURE.md § Current deviations.
+      auth-net:
+        ipv4_address: 172.23.0.120
+        aliases: [ tomcat-test-chess ]
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  chess-front-test:
+    image: nginx:alpine
+    container_name: chess-front-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/chess/.env
+    volumes:
+      - ./nginx/chess-front-app/dist:/usr/share/nginx/html/chess/app:ro
+      - ./nginx/chess-front-app/django.conf:/etc/nginx/django.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.121
+        aliases: [ chess-front-app-test ]
+
+  chess-game-test:
+    build:
+      context: django/chess-game-front
+      args:
+        STOCKFISH_VERSION: sf_18
+        STOCKFISH_VARIANT: x86-64-avx2
+    image: milkyway/chess-game-front-test:local
+    container_name: chess-game-test
+    restart: unless-stopped
+    env_file:
+      - env/django/chess/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.122
+        aliases: [ chess-game-front-test ]
+
+  # --- HACMAN (rest + front + game) ---
+
+  hacman-rest-test:
+    image: hacman-app-back
+    container_name: hacman-rest-test
+    build:
+      context: kestrel/hacman-app-back
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - postgres-test
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - env/kestrel/hacman/back/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.130
+        aliases: [ hacman-app-back, hacman-app-back-test ]
+      internal:
+        ipv4_address: 172.22.0.130
+        aliases: [ hacman-app-back, hacman-app-back-test ]
+
+  hacman-front-test:
+    image: hacman-app-front
+    container_name: hacman-front-test
+    build:
+      context: kestrel/hacman-app-front
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - hacman-rest-test
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - env/kestrel/hacman/front/.env
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.131
+        aliases: [ hacman-app-front, hacman-app-front-test ]
+
+  hacman-game-test:
+    build: ./nginx/hacman-game-app
+    image: milkyway/hacman-game-app-test:local
+    container_name: hacman-game-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/hacman/.env
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.132
+        aliases: [ hacman-game-app-test ]
+
+  # --- ROBAK (rest + front + game) ---
+  # Enable robak-rest-test once the WAR exists at tomcat/app/robak-rest-api##latest.war.
+  # Until then Docker would create a directory in its place and Tomcat would
+  # restart-loop; robak-test-svc in traefik answers 502 in the meantime, as expected.
+  #
+  # robak-rest-test:
+  #   image: tomcat:10.1-jdk25-temurin
+  #   container_name: robak-rest-test
+  #   restart: unless-stopped
+  #   env_file:
+  #     - env/tomcat/.env
+  #   environment:
+  #     - JAVA_OPTS=-Xms512m -Xmx1g
+  #   volumes:
+  #     - ./tomcat/app/robak-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+  #     - ./tomcat/setenv/robak/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+  #     - ./env/tomcat/robak-rest.properties:/usr/local/tomcat/conf/robak-rest.properties:ro
+  #     - ../../../resources/test:/app/fileserver
+  #     - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+  #   networks:
+  #     proxy:
+  #       ipv4_address: 172.21.0.140
+  #     internal:
+  #       ipv4_address: 172.22.0.140
+  #   extra_hosts:
+  #     - "milkyway.test:172.21.0.2"
+
+  # The front panel and the board are both static Vite bundles served by stock nginx.
+  # nginx.conf is a full config (events/http), so it mounts at /etc/nginx/nginx.conf —
+  # anywhere else and nginx silently runs its default config, with no SPA fallback.
+  robak-front-test:
+    image: nginx:alpine
+    container_name: robak-front-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/robak-front/.env
+    volumes:
+      - ./nginx/robak-front-app/dist:/usr/share/nginx/html/robak/app:ro
+      - ./nginx/robak-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.141
+        aliases: [ robak-front-app-test ]
+
+  robak-game-test:
+    image: nginx:alpine
+    container_name: robak-game-test
+    restart: unless-stopped
+    env_file:
+      - env/nginx/robak-game/.env
+    volumes:
+      - ./nginx/robak-game-app/dist:/usr/share/nginx/html/robak/game:ro
+      - ./nginx/robak-game-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.142
+        aliases: [ robak-game-app-test ]
+
+  # --- FUTURE APPS ---
+  # element (.150), racer (.160), puzzel (.170) each get rest + front + game.
+  # MariaDB already holds test_element and test_racer; MongoDB already holds
+  # test_puzzel. See docs/future/ADDING-AN-APP.md for the full checklist and
+  # docs/future/element-racer-puzzel.yml for ready-to-paste service blocks.
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+  promtail-positions:
+    driver: local
+  mariadb-data:
+    driver: local
+  postgres-data:
+    driver: local
+  mongo-data:
+    driver: local
+
+networks:
+  proxy:
+    name: proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+  internal:
+    name: internal
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.0.0/24
+  # Andromeda + Nebula only. Membership IS the access control: a container that
+  # is not on this network has no route to the authorization server.
+  auth-net:
+    name: auth-net
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.23.0.0/24

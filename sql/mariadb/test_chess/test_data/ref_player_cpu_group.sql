@@ -1,0 +1,10 @@
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (3, 'Active');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (2, 'Creative');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (4, 'Cultural');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (7, 'Curious');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (5, 'Entertaining');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (6, 'Gamers');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (10, 'Modern');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (9, 'Reflective');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (8, 'Social');
+INSERT INTO test_chess.ref_player_cpu_group (id, name) VALUES (1, 'Technological');

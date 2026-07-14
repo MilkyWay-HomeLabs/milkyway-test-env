@@ -1,0 +1,14 @@
+ANDROMEDA_AUTH_SERV_URL=https://andromeda.test.milkyway
+ANDROMEDA_AUTH_SERV_TEST_URL=https://andromeda.test.milkyway
+APP_JWT_SECRET=your_secret_jwt
+HEADER_FOR_AUTH_SERVER=robak_rest_api
+ROBAK_DB_URL=jdbc:mariadb://mariadb-test:3306/test_robak
+ROBAK_PASSWORD=password_for_test_robak_scheme
+ROBAK_USERNAME=robak
+ROBAK_TEST_DB_URL=jdbc:mariadb://mariadb-test:3306/test_robak
+ROBAK_TEST_PASSWORD=password_for_test_robak_scheme
+ROBAK_TEST_USERNAME=robak
+SPRING_SECURITY_PASSWORD=your_spring_security_password
+SPRING_SECURITY_USERNAME=robak
+CORS_ALLOWED_ORIGIN_PATTERNS=https://milkyway.test,https://*.milkyway.test,https://milkyway.inet,https://*.milkyway.inet,https://*.milkyway,https://*.test.milkyway,https://*.dev.milkyway
+APP_RESOURCES_BASE_URL=https://milkyway.test/resources/robak/

@@ -1,0 +1,1 @@
+INSERT INTO test_chess.settings_general (game_save_id, auto_promotion_queen, difficulty_id, bonus_content, created_at, updated_at) VALUES ('123e4567-e89b-12d3-a456-426614174000', 1, 3, 0, '2025-07-27 08:38:43', '2025-07-27 08:38:44');

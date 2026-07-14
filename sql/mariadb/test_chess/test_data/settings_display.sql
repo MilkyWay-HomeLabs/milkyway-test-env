@@ -1,0 +1,1 @@
+INSERT INTO test_chess.settings_display (game_save_id, auto_change, theme_id, created_at, updated_at) VALUES ('123e4567-e89b-12d3-a456-426614174000', 0, 13, '2025-07-27 08:39:34', '2025-07-27 08:39:34');

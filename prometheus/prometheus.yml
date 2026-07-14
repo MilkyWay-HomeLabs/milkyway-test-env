@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Targets use the <app>-<role>-test container names (see docs/NAMING.md).
+# Prometheus scrapes over the `internal` network, so every target below must be
+# a member of it — that is why the fronts and games (proxy-only) are not scraped.
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'prometheus-test:9090' ]
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: [ 'node-exporter-test:9100' ]
+
+  - job_name: 'andromeda-auth'
+    metrics_path: /api/actuator/prometheus
+    static_configs:
+      - targets: [ 'andromeda-auth-test:8080' ]
+
+  - job_name: 'hacman-rest'
+    static_configs:
+      - targets: [ 'hacman-rest-test:8080' ]
+
+  # hacman-front-test lives on `proxy` only and is unreachable from Prometheus on
+  # `internal`. Scraping it would need a second network membership; left out until
+  # its metrics are actually wanted.

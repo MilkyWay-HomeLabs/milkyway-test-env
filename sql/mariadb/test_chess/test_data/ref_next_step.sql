@@ -1,0 +1,11 @@
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (1, 'CREATE_SEASON', 'Step used to create new season.', 100);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (2, 'CLOSE_SEASON', 'Step used for close current season.', 900);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (3, 'CREATE_PHASES', 'Step used to create tournament phases.', 200);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (4, 'START_MONTH', 'Step used for start next calendar month.', 250);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (5, 'UPDATE_PHASE', 'Step used for update next tournament phase, that not first in month.', 300);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (6, 'START_EVENT', 'Step used for marks start event day.', 400);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (7, 'PLAYER_GAME', 'Step used for marks human player game.', 450);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (8, 'COMPLETE_EVENT', 'Step used for finalize current event.', 500);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (9, 'CLOSE_PHASE', 'Step used for close current tournament phase.', 600);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (10, 'CLOSE_TOURNAMENT', 'Step used for closing current tournament.', 700);
+INSERT INTO test_chess.ref_next_step (id, name, description, priority) VALUES (11, 'CLOSE_MONTH', 'Step used for closing current month.', 800);

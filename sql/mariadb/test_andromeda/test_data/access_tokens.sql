@@ -1,0 +1,7 @@
+INSERT INTO access_tokens (user_id, token, expiration_date, jti, version)
+VALUES (1,
+        'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJqdGkiOiAiNmYzZTc5MmMtY2EzMi00YzlhLThhYmQtYTdhZTNkZGQyZmFkIiwgInN1YiI6ICIxIiwgImlzcyI6ICJBbmRyb21lZGFBdXRoQXBpIiwgInJvbGVzIjogWyJST0xFX0FETUlOIiwgIlJPTEVfVVNFUiJdLCAidmVyc2lvbiI6IDEsICJyZXZva2VkIjogZmFsc2UsICJpYXQiOiAxNzcyNzAwNjQ0LCAiZXhwIjogMTc3MjcwMjQ0NH0.xIaK9XTAfLtbgLD-swryp2ifSiatmo6TXvHGZCDVzXE',
+        '2026-03-05 10:20:44', '6f3e792c-ca32-4c9a-8abd-a7ae3ddd2fad', 1),
+       (2,
+        'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJqdGkiOiAiNTE2OTg1MTgtZWY0YS00MTJjLTkwZTItODZjZGRiOWNlMzQ5IiwgInN1YiI6ICIyIiwgImlzcyI6ICJBbmRyb21lZGFBdXRoQXBpIiwgInJvbGVzIjogWyJST0xFX1VTRVIiXSwgInZlcnNpb24iOiAxLCAicmV2b2tlZCI6IGZhbHNlLCAiaWF0IjogMTc3MjcwMDY0NCwgImV4cCI6IDE3NzI3MDI0NDR9.qQvwNTRXNAXKrJGMJzfIu9--a-2_RhXD0BTaOaz5kZ0',
+        '2026-03-05 10:20:44', '51698518-ef4a-412c-90e2-86cddb9ce349', 1);

@@ -1,0 +1,16 @@
+ANDROMEDA_AUTH_SERV_URL=https://andromeda.test.milkyway
+ANDROMEDA_AUTH_SERV_TEST_URL=https://andromeda.test.milkyway
+APP_JWT_SECRET=your_secret_jwt
+HEADER_FOR_AUTH_SERVER=chess_rest_api
+CHESS_DB_URL=jdbc:mariadb://mariadb-test:3306/test_chess
+CHESS_PASSWORD=password_for_test_chess_scheme
+CHESS_USERNAME=chess
+CHESS_TEST_DB_URL=jdbc:mariadb://mariadb-test:3306/test_chess
+CHESS_TEST_PASSWORD=password_for_test_chess_scheme
+CHESS_TEST_USERNAME=chess
+SPRING_SECURITY_PASSWORD=your_spring_security_password
+SPRING_SECURITY_USERNAME=chess
+USER_AVATAR_UPLOAD_PATH=/var/www/html/user/avatar
+USER_AVATAR_UPLOAD_TEST_PATH=/var/www/html/user/avatar
+CORS_ALLOWED_ORIGIN_PATTERNS=https://milkyway.test,https://*.milkyway.test,https://milkyway.inet,https://*.milkyway.inet,https://*.milkyway,https://*.test.milkyway,https://*.dev.milkyway}
+APP_RESOURCES_BASE_URL=https://milkyway.test/resources/chess/

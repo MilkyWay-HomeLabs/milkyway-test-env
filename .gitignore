@@ -1,0 +1,74 @@
+# ==========================================================================
+# SECRETS — deny by pattern, not by enumeration.
+#
+# The previous version of this file listed each secret file by name, so every new
+# one had to be remembered; some were not, and real credentials reached a public
+# repo. The rules below ignore ALL env and properties files anywhere in the tree
+# and then re-admit only the *.example templates. A new secret file is ignored by
+# default — you have to opt in to committing it, not opt out.
+#
+# Before pushing, verify:
+#   git ls-files | grep -E '\.(env|properties)$' | grep -v '\.example$'
+#   -> must print nothing
+# ==========================================================================
+
+.env
+*.env
+!*.env.example
+!.env.example
+
+env/**/*.properties
+!env/**/*.properties.example
+
+# TLS — the key above all, but the cert is regenerated per machine too.
+# The globs are recursive on purpose: traefik/certs/_old/ held a CA private key that a
+# top-level-only rule (traefik/certs/*.key) happily let through.
+traefik/certs/**/*.key
+traefik/certs/**/*.crt
+traefik/certs/**/*.csr
+traefik/certs/**/*.srl
+traefik/certs/_old/
+traefik/letsencrypt/
+
+# ==========================================================================
+# DATA — never commit. `backups/` holds database dumps in the clear.
+# ==========================================================================
+backups/
+resources/
+
+# ==========================================================================
+# BUILD OUTPUT & BINARIES
+# The WARs and front-end bundles are build artifacts; they are deployed to this
+# directory but rebuilt from their own application repositories.
+# ==========================================================================
+**/dist/
+tomcat/app/*.war
+tomcat/archive/
+kestrel/**/bin/
+kestrel/**/obj/
+**/node_modules/
+**/__pycache__/
+*.pyc
+
+# Application source trees vendored in for building — they live in their own repos.
+# django/chess-game-front is literally a git checkout of its own (it has a .git and a
+# Jenkinsfile). Committing it here would nest one repo inside another.
+kestrel/hacman-app-back/
+kestrel/hacman-app-front/
+django/chess-game-front/
+
+# Superseded front-end bundles, kept on disk for quick rollback. Build output, not source.
+nginx/*-archive/
+tomcat/archive/
+**/htmlcov/
+.coverage
+
+# ==========================================================================
+# LOCAL / EDITOR
+# ==========================================================================
+.idea/
+.vscode/
+*.swp
+.DS_Store
+_0utside/
+*.pre-merge.bak/

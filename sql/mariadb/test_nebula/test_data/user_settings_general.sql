@@ -1,0 +1,13 @@
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (11, 1);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (13, 1);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (15, 2);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (2, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (3, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (4, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (5, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (7, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (9, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (10, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (12, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (14, 17);
+INSERT INTO test_nebula.user_settings_general (user_id, theme_id) VALUES (1000011, 17);

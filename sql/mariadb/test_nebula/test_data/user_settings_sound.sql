@@ -1,0 +1,14 @@
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (2, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (3, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (4, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (5, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (7, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (9, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (10, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (11, 0, 37, 40, 0, 24, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (12, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (13, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (15, 1, 10, 10, 10, 0, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (188, 0, 100, 100, 100, 100, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (189, 1, 0, 0, 0, 0, 1);
+INSERT INTO test_nebula.user_settings_sound (user_id, muted, volume_master, volume_music, volume_effects, volume_voices, battle_cry) VALUES (1000011, 1, 100, 90, 90, 90, 1);
