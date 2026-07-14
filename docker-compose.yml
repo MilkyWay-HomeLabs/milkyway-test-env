@@ -272,7 +272,7 @@ services:
       - "milkyway.test:172.21.0.2"
 
   nebula-front-test:
-    build: ./nginx/nebula-front-app
+    build: ./nginx/nebula-front
     image: milkyway/nebula-front-app-test:local
     container_name: nebula-front-test
     restart: unless-stopped
@@ -322,19 +322,19 @@ services:
     env_file:
       - env/nginx/chess/.env
     volumes:
-      - ./nginx/chess-front-app/dist:/usr/share/nginx/html/chess/app:ro
+      - ./nginx/chess-front/dist:/usr/share/nginx/html/chess/app:ro
       # nginx.conf is a full config (events/http) and must land on /etc/nginx/nginx.conf.
       # The compose file used to point at a django.conf that no longer exists: Docker would
       # have silently created a *directory* in its place, leaving nginx on its stock config
       # with no SPA fallback — every deep link a 404. Same trap as robak-front-test.
-      - ./nginx/chess-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/chess-front/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       proxy:
         ipv4_address: 172.21.0.121
 
   chess-game-test:
     build:
-      context: django/chess-game-front
+      context: django/chess-game/app
       args:
         STOCKFISH_VERSION: sf_18
         STOCKFISH_VARIANT: x86-64-avx2
@@ -388,7 +388,7 @@ services:
         ipv4_address: 172.21.0.131
 
   hacman-game-test:
-    build: ./nginx/hacman-game-app
+    build: ./nginx/hacman-game
     image: milkyway/hacman-game-app-test:local
     container_name: hacman-game-test
     restart: unless-stopped
@@ -435,8 +435,8 @@ services:
     env_file:
       - env/nginx/robak-front/.env
     volumes:
-      - ./nginx/robak-front-app/dist:/usr/share/nginx/html/robak/app:ro
-      - ./nginx/robak-front-app/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/robak-front/dist:/usr/share/nginx/html/robak/app:ro
+      - ./nginx/robak-front/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       proxy:
         ipv4_address: 172.21.0.141
@@ -448,8 +448,8 @@ services:
     env_file:
       - env/nginx/robak-game/.env
     volumes:
-      - ./nginx/robak-game-app/dist:/usr/share/nginx/html/robak/game:ro
-      - ./nginx/robak-game-app/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/robak-game/dist:/usr/share/nginx/html/robak/game:ro
+      - ./nginx/robak-game/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       proxy:
         ipv4_address: 172.21.0.142

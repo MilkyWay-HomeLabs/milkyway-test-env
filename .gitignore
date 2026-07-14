@@ -51,14 +51,21 @@ kestrel/**/obj/
 *.pyc
 
 # Application source trees vendored in for building — they live in their own repos.
-# django/chess-game-front is literally a git checkout of its own (it has a .git and a
-# Jenkinsfile). Committing it here would nest one repo inside another.
+# django/chess-game/app is literally a git checkout of its own (it has a .git and a
+# Jenkinsfile). Committing it here would nest one repo inside another — which is exactly
+# why the archive sits NEXT to it, at django/chess-game/archive, and not inside it.
 kestrel/hacman-app-back/
 kestrel/hacman-app-front/
-django/chess-game-front/
+django/chess-game/app/
 
-# Superseded front-end bundles, kept on disk for quick rollback. Build output, not source.
-nginx/*-archive/
+# Superseded bundles, kept on disk for quick rollback. Build output, not source.
+# One archive/ per application directory, mirroring the container it feeds:
+#   nginx/chess-front/archive  ->  chess-front-test
+#
+# Scoped to nginx/ and django/ on purpose — a bare **/archive/ would also swallow
+# sql/mariadb/test_andromeda/archive/, which holds committed ER diagrams.
+nginx/*/archive/
+django/*/archive/
 tomcat/archive/
 **/htmlcov/
 .coverage
