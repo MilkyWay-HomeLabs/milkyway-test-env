@@ -25,11 +25,6 @@
 #   Andromeda URL in their properties; that is a known deviation, tracked in
 #   docs/ARCHITECTURE.md, and it stops working the moment they are recreated
 #   without auth-net. Do not recreate them until their app-side change has landed.
-#
-# TRANSITIONAL: every renamed container carries a network alias for its previous
-# name so that traefik/config/dynamic.yml, the *.properties files and
-# prometheus.yml keep resolving during the rename. Remove the `aliases:` blocks
-# once those files have been updated to the new names — see docs/MIGRATION.md.
 
 services:
   traefik-test:
@@ -41,10 +36,8 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.2
-        aliases: [ traefik ]
       internal:
         ipv4_address: 172.22.0.2
-        aliases: [ traefik ]
     ports:
       - "80:80"
       - "443:443"
@@ -78,7 +71,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.3
-        aliases: [ prometheus ]
 
   grafana-test:
     image: grafana/grafana:11.4.0
@@ -96,7 +88,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.4
-        aliases: [ grafana ]
 
   node-exporter-test:
     image: prom/node-exporter:v1.8.2
@@ -112,7 +103,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.5
-        aliases: [ node-exporter ]
 
   loki-test:
     image: grafana/loki:3.0.0
@@ -127,7 +117,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.6
-        aliases: [ loki ]
 
   promtail-test:
     image: grafana/promtail:3.0.0
@@ -142,7 +131,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.7
-        aliases: [ promtail ]
 
   # --- SHARED INFRASTRUCTURE ---
 
@@ -199,7 +187,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.31
-        aliases: [ milky-test-mariadb ]
 
   postgres-test:
     image: postgres:16
@@ -215,7 +202,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.32
-        aliases: [ milky-test-postgres ]
 
   mongo-test:
     image: mongo:8
@@ -231,7 +217,6 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.33
-        aliases: [ milky-test-mongo ]
 
   # --- ANDROMEDA (authorization server) ---
   # Deliberately NOT on `proxy`: it has no public route. The only container that
@@ -253,10 +238,8 @@ services:
     networks:
       internal:
         ipv4_address: 172.22.0.100
-        aliases: [ tomcat-test-andromeda ]
       auth-net:
         ipv4_address: 172.23.0.100
-        aliases: [ tomcat-test-andromeda ]
     extra_hosts:
       - "milkyway.test:172.21.0.2"
 
@@ -281,13 +264,10 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.110
-        aliases: [ tomcat-test-nebula ]
       internal:
         ipv4_address: 172.22.0.110
-        aliases: [ tomcat-test-nebula ]
       auth-net:
         ipv4_address: 172.23.0.110
-        aliases: [ tomcat-test-nebula ]
     extra_hosts:
       - "milkyway.test:172.21.0.2"
 
@@ -301,7 +281,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.111
-        aliases: [ nebula-front-app-test ]
 
   # --- CHESS (rest + front + game) ---
 
@@ -323,10 +302,8 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.120
-        aliases: [ tomcat-test-chess ]
       internal:
         ipv4_address: 172.22.0.120
-        aliases: [ tomcat-test-chess ]
       # TEMPORARY EXCEPTION — violates the "only Nebula talks to Andromeda" rule.
       # Chess REST still calls the authorization server directly
       # (ANDROMEDA_AUTH_SERV_URL in env/tomcat/chess-rest.properties). Removing this
@@ -335,7 +312,6 @@ services:
       # Tracked in docs/ARCHITECTURE.md § Current deviations.
       auth-net:
         ipv4_address: 172.23.0.120
-        aliases: [ tomcat-test-chess ]
     extra_hosts:
       - "milkyway.test:172.21.0.2"
 
@@ -355,7 +331,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.121
-        aliases: [ chess-front-app-test ]
 
   chess-game-test:
     build:
@@ -371,7 +346,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.122
-        aliases: [ chess-game-front-test ]
 
   # --- HACMAN (rest + front + game) ---
 
@@ -391,10 +365,8 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.130
-        aliases: [ hacman-app-back, hacman-app-back-test ]
       internal:
         ipv4_address: 172.22.0.130
-        aliases: [ hacman-app-back, hacman-app-back-test ]
 
   hacman-front-test:
     image: hacman-app-front
@@ -414,7 +386,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.131
-        aliases: [ hacman-app-front, hacman-app-front-test ]
 
   hacman-game-test:
     build: ./nginx/hacman-game-app
@@ -426,7 +397,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.132
-        aliases: [ hacman-game-app-test ]
 
   # --- ROBAK (rest + front + game) ---
   # Enable robak-rest-test once the WAR exists at tomcat/app/robak-rest-api##latest.war.
@@ -470,7 +440,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.141
-        aliases: [ robak-front-app-test ]
 
   robak-game-test:
     image: nginx:alpine
@@ -484,7 +453,6 @@ services:
     networks:
       proxy:
         ipv4_address: 172.21.0.142
-        aliases: [ robak-game-app-test ]
 
   # --- FUTURE APPS ---
   # element (.150), racer (.160), puzzel (.170) each get rest + front + game.

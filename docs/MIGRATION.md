@@ -45,11 +45,11 @@ SHA-256 for every artifact:
 - **State** — `docker inspect` of every container, both networks, the live IP map, and
   per-table row counts to verify against after the cutover.
 
-## Phase 6 — the cutover (NOT yet executed)
+## Phase 6 — the cutover (EXECUTED 2026-07-14)
 
-Everything above is on disk. **No running container has been touched.** Compose,
-properties, `prometheus.yml` and the SQL init files are all read at *container start*, so
-the changes are inert until something is recreated.
+**Done.** All 22 containers now run under the new names, the databases were recreated
+against their existing volumes with row counts verified against the pre-migration
+snapshot, and the segmentation was tested end to end (see "What the cutover found").
 
 Two things make the cutover safe, and both are worth understanding before you run it:
 
@@ -153,3 +153,50 @@ and a new, empty set of volumes.
   `Jenkinsfile` in `chess-game-front` is from an abandoned setup — ignore it, and do not
   build against it. See `docs/SECRETS.md` § CI for which secrets a pipeline would need
   (the database passwords are not among them).
+
+## What the cutover found
+
+Three things only showed up once the containers were actually recreated. Worth recording,
+because none of them were visible in a running system.
+
+**1. `chess-front-test` and `fileserver-test` mounted a `django.conf` that does not exist.**
+The running containers had been created from an older compose and mounted
+`nginx.conf → /etc/nginx/nginx.conf`; the compose file had drifted away from them. On
+recreate, Docker would have created a *directory* named `django.conf` and left nginx on
+its stock config — no SPA fallback, so every deep link would 404. Caught by a preflight
+check that every bind-mount source exists before recreating anything. Fixed in `2ba6b7d`.
+
+**2. Renaming a compose *service key* does not replace the container — it creates a second
+one.** `mariadb-test` kept its key and was replaced cleanly. But `tomcat-test-nebula` →
+`nebula-rest-test` is a *new service*, so compose started the new container and left the
+old one running as an orphan. Both answered to `tomcat-test-nebula` (the new one via its
+transitional alias), so Traefik would have load-balanced across old and new at random.
+`--remove-orphans` is what cleans it up, and it is not optional during a rename.
+
+**3. Taking Andromeda off `proxy` did NOT remove its public route.** `/andromeda` still
+answered 401 afterwards. Traefik is also on `internal`, where Andromeda still lives for
+its database connection — so the router kept resolving. Network membership alone does not
+close a Traefik route; **the router has to be deleted too**. It now 404s.
+
+The lesson in all three: a config that looks correct against a *running* system can still
+be wrong, because the running system was built from something else. Verify against
+`docker inspect`, not against the file you are reading.
+
+## Verified after cutover
+
+| Check | Result |
+|---|---|
+| `test_andromeda.users` | 18 — matches pre-migration snapshot |
+| `test_hacman.level_scores` | 9604 — matches |
+| `test_players.nationalities` | 249 — matches |
+| `robak.region` | 1024 — matches |
+| `test_puzzel.metadata` | 1 — matches |
+| All app routes through Traefik | 200 |
+| `/andromeda` | 404 — no public route |
+| `nebula-rest-test` → Andromeda | reachable ✅ (required) |
+| `hacman-rest-test` → Andromeda | no route ✅ (required) |
+| `chess-front-test` → MariaDB | no route ✅ (required) |
+| `chess-rest-test` → Andromeda | reachable ⚠️ — the known deviation, still intact |
+
+Transitional aliases have been removed; `dynamic.yml`, `prometheus.yml` and the properties
+files all use the new names.

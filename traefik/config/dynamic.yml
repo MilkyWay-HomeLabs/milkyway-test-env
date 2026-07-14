@@ -163,12 +163,20 @@ http:
       tls: { }
 
     # --- ANDROMEDA APP (TEST) ---
-    andromeda-api-test:
-      rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda`)"
-      entryPoints: [ "https" ]
-      service: "andromeda-test-svc"
-      middlewares: [ "strip-andromeda" ]
-      tls: { }
+    # NO PUBLIC ROUTER, on purpose. Andromeda is the authorization server; only Nebula
+    # may reach it, over auth-net. A browser has no business talking to it directly.
+    #
+    # Taking Andromeda off the `proxy` network was NOT enough to close this: Traefik is
+    # also on `internal`, where Andromeda still lives for its database, so the router
+    # below kept resolving and /andromeda answered 401 — reachable, just unauthenticated.
+    # Deleting the router is what actually closes the door.
+    #
+    # andromeda-api-test:
+    #   rule: "Host(`milkyway.test`) && PathPrefix(`/andromeda`)"
+    #   entryPoints: [ "https" ]
+    #   service: "andromeda-test-svc"
+    #   middlewares: [ "strip-andromeda" ]
+    #   tls: { }
 
     # --- DEVELOPMENT ENVIRONMENT ---
 
@@ -258,46 +266,44 @@ http:
         servers: [ { url: "http://fileserver-test:80" } ]
     prometheus-svc:
       loadBalancer:
-        servers: [ { url: "http://prometheus:9090" } ]
+        servers: [ { url: "http://prometheus-test:9090" } ]
     grafana-svc:
       loadBalancer:
-        servers: [ { url: "http://grafana:3000" } ]
-    andromeda-test-svc:
-      loadBalancer:
-        servers: [ { url: "http://tomcat-test-andromeda:8080" } ]
+        servers: [ { url: "http://grafana-test:3000" } ]
+    # andromeda-test-svc intentionally removed — see the router comment above.
     nebula-test-svc:
       loadBalancer:
-        servers: [ { url: "http://tomcat-test-nebula:8080" } ]
+        servers: [ { url: "http://nebula-rest-test:8080" } ]
     nebula-front-test-svc:
       loadBalancer:
-        servers: [ { url: "http://nebula-front-app-test:80" } ]
+        servers: [ { url: "http://nebula-front-test:80" } ]
     chess-test-svc:
       loadBalancer:
-        servers: [ { url: "http://tomcat-test-chess:8080" } ]
+        servers: [ { url: "http://chess-rest-test:8080" } ]
     chess-game-test-svc:
       loadBalancer:
-        servers: [ { url: "http://chess-game-front-test:80" } ]
+        servers: [ { url: "http://chess-game-test:80" } ]
     chess-front-test-svc:
       loadBalancer:
-        servers: [ { url: "http://chess-front-app-test:80" } ]
+        servers: [ { url: "http://chess-front-test:80" } ]
     hacman-test-svc:
       loadBalancer:
-        servers: [ { url: "http://hacman-app-back:8080" } ]
+        servers: [ { url: "http://hacman-rest-test:8080" } ]
     hacman-front-test-svc:
       loadBalancer:
-        servers: [ { url: "http://hacman-app-front:8080" } ]
+        servers: [ { url: "http://hacman-front-test:8080" } ]
     hacman-game-test-svc:
       loadBalancer:
-        servers: [ { url: "http://hacman-game-app-test:80" } ]
+        servers: [ { url: "http://hacman-game-test:80" } ]
     robak-test-svc:
       loadBalancer:
-        servers: [ { url: "http://tomcat-test-robak:8080" } ]
+        servers: [ { url: "http://robak-rest-test:8080" } ]
     robak-game-test-svc:
       loadBalancer:
-        servers: [ { url: "http://robak-game-app-test:80" } ]
+        servers: [ { url: "http://robak-game-test:80" } ]
     robak-front-test-svc:
       loadBalancer:
-        servers: [ { url: "http://robak-front-app-test:80" } ]
+        servers: [ { url: "http://robak-front-test:80" } ]
 
     # Dev endpoints
     andromeda-dev-svc:

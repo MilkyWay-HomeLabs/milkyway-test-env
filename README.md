@@ -13,14 +13,14 @@ observability.
 
 ## Applications
 
-| App | REST | Front | Game | Database |
-|---|---|---|---|---|
-| **andromeda** | `andromeda-auth-test` — authorization server | — | — | MariaDB `test_andromeda` |
-| **nebula** | `nebula-rest-test` | `nebula-front-test` | — | MariaDB `test_nebula` |
-| **chess** | `chess-rest-test` | `chess-front-test` | `chess-game-test` | MariaDB `test_chess` |
-| **hacman** | `hacman-rest-test` | `hacman-front-test` | `hacman-game-test` | PostgreSQL `test_hacman` |
-| **robak** | *pending WAR* | `robak-front-test` | `robak-game-test` | MariaDB `test_robak` |
-| **element** / **racer** / **puzzel** | reserved | reserved | reserved | see [docs/future/](docs/future/ADDING-AN-APP.md) |
+| App                                  | REST                                         | Front               | Game               | Database                                         |
+|--------------------------------------|----------------------------------------------|---------------------|--------------------|--------------------------------------------------|
+| **andromeda**                        | `andromeda-auth-test` — authorization server | —                   | —                  | MariaDB `test_andromeda`                         |
+| **nebula**                           | `nebula-rest-test`                           | `nebula-front-test` | —                  | MariaDB `test_nebula`                            |
+| **chess**                            | `chess-rest-test`                            | `chess-front-test`  | `chess-game-test`  | MariaDB `test_chess`                             |
+| **hacman**                           | `hacman-rest-test`                           | `hacman-front-test` | `hacman-game-test` | PostgreSQL `test_hacman`                         |
+| **robak**                            | *pending WAR*                                | `robak-front-test`  | `robak-game-test`  | MariaDB `test_robak`                             |
+| **element** / **racer** / **puzzel** | reserved                                     | reserved            | reserved           | see [docs/future/](docs/future/ADDING-AN-APP.md) |
 
 Nebula is the SSO gateway. Andromeda is the authorization server, and **only Nebula may
 talk to it** — a rule enforced by network membership, not by convention. Read
@@ -49,11 +49,11 @@ docker compose -p test up -d
 
 Then open <https://milkyway.test/nebula/app/>.
 
-| | |
-|---|---|
-| Traefik dashboard | <https://milkyway.test/dashboard/> |
-| Grafana | <https://milkyway.test/grafana/> |
-| Prometheus | <https://milkyway.test/prometheus/> |
+|                   |                                     |
+|-------------------|-------------------------------------|
+| Traefik dashboard | <https://milkyway.test/dashboard/>  |
+| Grafana           | <https://milkyway.test/grafana/>    |
+| Prometheus        | <https://milkyway.test/prometheus/> |
 
 ## Three things that will bite you
 
@@ -96,12 +96,12 @@ See [docs/BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md) for restore.
 
 ## Documentation
 
-| | |
-|---|---|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | networks, IP plan, **who may talk to whom** |
-| [NAMING.md](docs/NAMING.md) | the `<app>-<role>-test` convention |
-| [SECRETS.md](docs/SECRETS.md) | where secrets live, how to rotate, the traps |
-| [MIGRATION.md](docs/MIGRATION.md) | the 2026-07 merge and the cutover runbook |
-| [BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md) | backup and restore |
-| [future/ADDING-AN-APP.md](docs/future/ADDING-AN-APP.md) | checklist for element / racer / puzzel |
-| [CHANGELOG.md](docs/CHANGELOG.md) | history |
+|                                                         |                                              |
+|---------------------------------------------------------|----------------------------------------------|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md)                 | networks, IP plan, **who may talk to whom**  |
+| [NAMING.md](docs/NAMING.md)                             | the `<app>-<role>-test` convention           |
+| [SECRETS.md](docs/SECRETS.md)                           | where secrets live, how to rotate, the traps |
+| [MIGRATION.md](docs/MIGRATION.md)                       | the 2026-07 merge and the cutover runbook    |
+| [BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md)                 | backup and restore                           |
+| [future/ADDING-AN-APP.md](docs/future/ADDING-AN-APP.md) | checklist for element / racer / puzzel       |
+| [CHANGELOG.md](docs/CHANGELOG.md)                       | history                                      |
