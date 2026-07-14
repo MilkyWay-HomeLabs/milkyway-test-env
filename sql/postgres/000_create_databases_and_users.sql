@@ -21,17 +21,32 @@ GRANT ALL PRIVILEGES ON DATABASE hacman TO wolf;
 GRANT ALL PRIVILEGES ON DATABASE test_hacman TO wolf;
 GRANT ALL PRIVILEGES ON DATABASE test_players TO wolf;
 
--- Grant backup users
+-- Grant the backup user read access, per database.
+--
+-- GRANT ... ON SCHEMA / ON ALL TABLES only ever applies to the database you are
+-- CONNECTED to — the preceding "GRANT CONNECT ON DATABASE <x>" does not switch you into
+-- it. The original version ran all nine statements while still connected to `postgres`,
+-- so the backup user got SELECT on nothing, and pg_dump of test_hacman failed with
+-- "permission denied for table level_scores" for months while the job still reported
+-- success. The \connect lines below are the whole fix.
+--
+-- ALTER DEFAULT PRIVILEGES only covers tables created *afterwards* by the granting role,
+-- so it does not retroactively cover tables an application already created. If an app
+-- adds tables later as its own user, re-run the GRANT for that database.
+
+\connect hacman
 GRANT CONNECT ON DATABASE hacman TO backup;
 GRANT USAGE ON SCHEMA public TO backup;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO backup;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO backup;
 
+\connect test_hacman
 GRANT CONNECT ON DATABASE test_hacman TO backup;
 GRANT USAGE ON SCHEMA public TO backup;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO backup;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO backup;
 
+\connect test_players
 GRANT CONNECT ON DATABASE test_players TO backup;
 GRANT USAGE ON SCHEMA public TO backup;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO backup;

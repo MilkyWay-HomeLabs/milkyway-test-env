@@ -114,3 +114,39 @@ gh secret set APP_JWT_SECRET --repo MilkyWay-HomeLabs/<app-repo>
 
 The environment's own runtime secrets (everything under `env/`) are delivered by files on
 this host, not by CI. A pipeline never needs them.
+
+## Rotation of 2026-07-14 — and the three bugs it uncovered
+
+Every leaked credential was rotated and verified: MariaDB (root, `milky_user`, `backup`,
+and the per-app users), PostgreSQL (`milky_user`, `hacman`, `players`, `backup`, `wolf`),
+MongoDB (`admin`, `puzzel`), `APP_JWT_SECRET`, `SPRING_SECURITY_PASSWORD`,
+`ENCRYPTION_KEY`, Grafana and the Traefik dashboard. Old passwords are confirmed rejected.
+
+`ENCRYPTION_KEY` does encrypt data at rest — `confirmation_tokens.token` is stored with an
+`ENC_` prefix. The `users` table is not encrypted (bcrypt password, plaintext email), so no
+user data was at risk. The token tables were truncated as part of the rotation, since
+rotating `APP_JWT_SECRET` invalidated every token anyway. **Users must log in again.**
+
+Rotating the credentials is what surfaced three bugs that had been silently live:
+
+**The MongoDB `backup` user did not exist.** `mongo.env` declared it, the backup script
+used it, and Mongo had never had it. Every Mongo backup since at least 2026-05-31 wrote a
+**0-byte archive** — and the job reported success each time. Created with the `backup` and
+`readAnyDatabase` roles.
+
+**The backup script pointed at the pre-rename container names** (`milky-test-mariadb` and
+friends), so after the rename all three backups would have hung on DNS. Note the script is
+**baked into the image at build time** — editing `backup/run_backups.sh` on disk does
+nothing until `docker compose -p test build backup-test`.
+
+**The Postgres `backup` user had SELECT on nothing.** The init SQL ran its nine `GRANT`
+statements while connected to the `postgres` database throughout — `GRANT CONNECT ON
+DATABASE x` does not switch you into `x`. `pg_dump test_hacman` had been failing with
+*"permission denied for table level_scores"* while the other databases dumped fine and the
+job still exited 0. Fixed with `\connect` lines.
+
+**A backup job that exits 0 is not a backup.** Check the size of what it wrote:
+
+```bash
+find backups -name '*.gz' -size 0     # must print nothing
+```
