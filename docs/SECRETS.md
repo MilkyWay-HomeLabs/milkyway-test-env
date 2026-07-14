@@ -90,11 +90,14 @@ per-app database passwords never reached the public repo.
 
 **The `.example` files leaked instead — because they held real values, not placeholders:**
 
-| Value | In | Status |
+| Key | In | Status |
 |---|---|---|
-| `MARIADB_ROOT_PASSWORD=strong_root_pass` | `env/db/mariadb.env.example` | rotated → dead |
-| `RESTIC_PASSWORD=supersecretpassword` | `env/backup/restic.env.exmaple` | **was still live**; rotated 2026-07-14 |
-| `AUTH_MAIL_USERNAME=n60962851@gmail.com` | `andromeda-…properties.example` | an address, not a credential |
+| `MARIADB_ROOT_PASSWORD`, `MARIADB_PASSWORD` | `env/db/mariadb.env.example` | rotated → dead |
+| `RESTIC_PASSWORD` | `env/backup/restic.env.exmaple` | **was still live**; rotated 2026-07-14 |
+| `AUTH_MAIL_USERNAME` | `andromeda-…properties.example` | an address, not a credential |
+
+(The values themselves are recorded in the master file, not here. This document is
+published — printing a dead password still hands a reader your naming patterns.)
 
 Note the second row: the file name is **misspelled** (`exmaple`), so it dodged both the
 `.gitignore` rule and every `*.example` review. It carried the restic repository's
