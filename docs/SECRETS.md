@@ -64,7 +64,8 @@ read only when the data directory is empty. The Mongo volume is not empty. Rotat
 
 **`RESTIC_PASSWORD` is an encryption key, not a login.** Changing it in `restic.env` does
 not re-key the repository — it makes every existing snapshot unreadable. Use
-`restic key add` → verify → `restic key remove`.
+`restic key add` → verify → `restic key remove`. (Done on 2026-07-14: the old key was
+public. Snapshots survived.)
 
 **`HACMAN_PASSWORD` lives in two files.** It is in `env/db/postgres.env` and *embedded in
 the connection string* in `env/kestrel/hacman/back/.env`. Change one without the other and
@@ -78,17 +79,35 @@ not protect them, and never could. They are in the master file for completeness 
 rotation, but the real fix is a server-side auth flow. See `docs/ARCHITECTURE.md`
 § Current deviations.
 
-## The 2026-07 leak
+## The 2026-07 leak — what actually leaked
 
-The public repo `milkyway-test-env` carried working credentials in its git history,
-including a **Gmail app password**, the shared `APP_JWT_SECRET`, and every database
-password. `milkyway-home-lab` tracked `.env` and `env/db/*.env` from before its ignore rule
-existed.
+Audited against the real GitHub history (97 commits, every branch and pull-request ref),
+not against assumptions.
 
-History has been purged and the values rotated. Purging history does **not** un-leak a
-secret — anyone who cloned, forked, or scraped the repo still has the old values. The only
-thing that helps is rotation, which is why every value in the master file has an `old` and
-a `new` column.
+**The real secret files were never committed.** `env/tomcat/*.properties` and
+`env/db/*.env` were gitignored, so the Gmail app password, `APP_JWT_SECRET` and the
+per-app database passwords never reached the public repo.
+
+**The `.example` files leaked instead — because they held real values, not placeholders:**
+
+| Value | In | Status |
+|---|---|---|
+| `MARIADB_ROOT_PASSWORD=strong_root_pass` | `env/db/mariadb.env.example` | rotated → dead |
+| `RESTIC_PASSWORD=supersecretpassword` | `env/backup/restic.env.exmaple` | **was still live**; rotated 2026-07-14 |
+| `AUTH_MAIL_USERNAME=n60962851@gmail.com` | `andromeda-…properties.example` | an address, not a credential |
+
+Note the second row: the file name is **misspelled** (`exmaple`), so it dodged both the
+`.gitignore` rule and every `*.example` review. It carried the restic repository's
+encryption key in clear text, publicly, for months.
+
+This is the whole argument for **deny-by-pattern** ignore rules and for `.example` files
+that contain nothing but `CHANGE_ME`. An example file is published by definition — treat
+it as a public document, because it is one.
+
+**Deleting the old branches did not remove those commits.** GitHub keeps `refs/pull/N/head`
+for every pull request, so the commits stay reachable by SHA even with the branch gone.
+Purging history does not un-leak a secret anyway — anyone who cloned still has it. Only
+rotation does, which is why every value in the master file has an `old` and a `new` column.
 
 ## CI — GitHub Actions
 
