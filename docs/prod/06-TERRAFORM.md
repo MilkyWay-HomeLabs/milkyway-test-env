@@ -1,0 +1,344 @@
+# Terraform Infrastructure as Code
+
+This document defines the recommended Terraform layout for provisioning MilkyWay production resources in K3s.
+
+## Versions and providers
+
+- Terraform: **`>= 1.7`**
+- Providers:
+  - `hashicorp/kubernetes`
+  - `hashicorp/helm`
+  - `hashicorp/local`
+
+## Recommended directory structure
+
+```text
+infrastructure/terraform/prod/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── providers.tf
+├── modules/
+│   ├── namespaces/
+│   ├── networking/
+│   ├── traefik/
+│   ├── monitoring/
+│   ├── databases/
+│   └── apps/
+└── environments/
+    └── prod/
+        └── terraform.tfvars
+```
+
+Suggested clone path on the Pi:
+
+```text
+/mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod/
+```
+
+## What Terraform should own
+
+Good Terraform targets in this project:
+
+- namespaces
+- labels and RBAC
+- Helm releases
+- TLS secrets
+- NetworkPolicies
+- ConfigMaps
+- baseline Services and Deployments/StatefulSets
+
+Keep real secret values outside versioned code.
+
+## Example `providers.tf`
+
+```hcl
+terraform {
+  required_version = ">= 1.7.0"
+
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.32"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.15"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.5"
+    }
+  }
+}
+
+provider "kubernetes" {
+  config_path = var.kubeconfig_path
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = var.kubeconfig_path
+  }
+}
+```
+
+## Example `variables.tf`
+
+```hcl
+variable "kubeconfig_path" {
+  type        = string
+  description = "Absolute path to the kubeconfig used for the production cluster"
+  default     = "/home/wolf/.kube/config"
+}
+
+variable "domain" {
+  type        = string
+  description = "Primary production domain"
+  default     = "milkyway.lab"
+}
+
+variable "traefik_tls_cert_path" {
+  type        = string
+  description = "Absolute path to the wildcard certificate"
+  default     = "/mnt/nvme/k3s/traefik/certs/milkyway.lab.crt"
+}
+
+variable "traefik_tls_key_path" {
+  type        = string
+  description = "Absolute path to the wildcard private key"
+  default     = "/mnt/nvme/k3s/traefik/certs/milkyway.lab.key"
+}
+```
+
+## Root module example
+
+```hcl
+module "namespaces" {
+  source = "./modules/namespaces"
+}
+
+module "traefik" {
+  source                = "./modules/traefik"
+  domain                = var.domain
+  traefik_tls_cert_path = var.traefik_tls_cert_path
+  traefik_tls_key_path  = var.traefik_tls_key_path
+}
+
+module "networking" {
+  source = "./modules/networking"
+}
+```
+
+## Example module: namespaces
+
+`modules/namespaces/main.tf`
+
+```hcl
+locals {
+  namespaces = {
+    milkyway-infra      = "infra"
+    milkyway-monitoring = "monitoring"
+    milkyway-data       = "data"
+    milkyway-apps       = "apps"
+  }
+}
+
+resource "kubernetes_namespace_v1" "this" {
+  for_each = local.namespaces
+
+  metadata {
+    name = each.key
+    labels = {
+      name                = each.key
+      "milkyway.io/tier" = each.value
+    }
+  }
+}
+```
+
+## Example module: Traefik Helm release
+
+`modules/traefik/main.tf`
+
+```hcl
+variable "domain" {
+  type = string
+}
+
+variable "traefik_tls_cert_path" {
+  type = string
+}
+
+variable "traefik_tls_key_path" {
+  type = string
+}
+
+resource "kubernetes_secret_v1" "traefik_tls" {
+  metadata {
+    name      = "milkyway-lab-tls"
+    namespace = "milkyway-infra"
+  }
+
+  type = "kubernetes.io/tls"
+
+  data = {
+    "tls.crt" = filebase64(var.traefik_tls_cert_path)
+    "tls.key" = filebase64(var.traefik_tls_key_path)
+  }
+}
+
+resource "helm_release" "traefik" {
+  name       = "traefik"
+  namespace  = "milkyway-infra"
+  repository = "https://traefik.github.io/charts"
+  chart      = "traefik"
+  version    = "34.4.1"
+
+  values = [yamlencode({
+    deployment = {
+      podLabels = {
+        "app.kubernetes.io/name" = "traefik"
+      }
+    }
+    service = {
+      type = "NodePort"
+    }
+    ports = {
+      web = {
+        nodePort = 30080
+      }
+      websecure = {
+        nodePort = 30443
+        tls = {
+          enabled = true
+        }
+      }
+    }
+    ingressRoute = {
+      dashboard = {
+        enabled = true
+      }
+    }
+  })]
+}
+```
+
+If you deploy MetalLB, switch `service.type` to `LoadBalancer` and optionally assign a fixed IP.
+
+## Example module: networking
+
+Use Terraform for reusable NetworkPolicies.
+
+```hcl
+resource "kubernetes_network_policy_v1" "allow_auth_net" {
+  metadata {
+    name      = "allow-auth-net"
+    namespace = "milkyway-apps"
+  }
+
+  spec {
+    pod_selector {
+      match_labels = {
+        "app.kubernetes.io/name" = "andromeda-auth-prod"
+      }
+    }
+
+    policy_types = ["Ingress"]
+
+    ingress {
+      from {
+        pod_selector {
+          match_labels = {
+            "app.kubernetes.io/name" = "nebula-rest-prod"
+          }
+        }
+      }
+      ports {
+        protocol = "TCP"
+        port     = 8080
+      }
+    }
+  }
+}
+```
+
+## Example environment variables file
+
+File: `environments/prod/terraform.tfvars`
+
+```hcl
+kubeconfig_path       = "/home/wolf/.kube/config"
+domain                = "milkyway.lab"
+traefik_tls_cert_path = "/mnt/nvme/k3s/traefik/certs/milkyway.lab.crt"
+traefik_tls_key_path  = "/mnt/nvme/k3s/traefik/certs/milkyway.lab.key"
+```
+
+Do **not** commit real passwords or tokens in this file.
+
+## State storage
+
+### Option A — local state
+
+Good enough for a home lab when one admin operates the cluster.
+
+Example state location:
+
+```text
+/mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod/terraform.tfstate
+```
+
+### Option B — remote state
+
+Use S3-compatible storage such as **MinIO** if you want:
+
+- team access
+- state locking
+- easier recovery from node replacement
+
+For a home lab, local state is acceptable. Remote state is a convenience upgrade, not a requirement.
+
+## Workflow
+
+Run Terraform from the production module root:
+
+```bash
+cd /mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod
+terraform init
+terraform plan -var-file=environments/prod/terraform.tfvars
+terraform apply -var-file=environments/prod/terraform.tfvars
+```
+
+## Handling sensitive values
+
+Recommended options:
+
+- `terraform.tfvars` kept out of Git
+- environment variables such as `TF_VAR_db_password`
+- generated Kubernetes Secrets from external files under `/mnt/nvme`
+
+Example with environment variables:
+
+```bash
+export TF_VAR_db_password='change-me'
+terraform apply -var-file=environments/prod/terraform.tfvars
+```
+
+Add these ignore rules in the repo root if they are not already present:
+
+```gitignore
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/.terraform/
+**/terraform.tfvars
+```
+
+## Recommended ownership split
+
+| Tool | Owns |
+|---|---|
+| Ansible | OS, packages, K3s install, Pi-hole, certificates |
+| Terraform | Namespaces, Helm releases, policies, services, workloads |
+| GitHub Actions | Image build and rollout updates |
+
+That split keeps responsibilities clean and avoids Terraform shelling into machines just to install the OS-level prerequisites.
