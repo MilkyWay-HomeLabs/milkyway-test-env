@@ -79,3 +79,6 @@ tomcat/archive/
 .DS_Store
 _0utside/
 *.pre-merge.bak/
+/django/chess-game-archive/
+/django/chess-game/
+/django/chess-game-front/
