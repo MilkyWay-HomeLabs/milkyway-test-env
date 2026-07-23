@@ -19,9 +19,9 @@ Why:
 
 ## Deployment options
 
-| Option | Use it when | Trade-off |
-|---|---|---|
-| Standalone Docker on the RPi | You want maximum reliability | Best choice for this home lab |
+| Option                          | Use it when                       | Trade-off                              |
+|---------------------------------|-----------------------------------|----------------------------------------|
+| Standalone Docker on the RPi    | You want maximum reliability      | Best choice for this home lab          |
 | Pi-hole pod in `milkyway-infra` | You want everything in Kubernetes | DNS disappears when K3s is unavailable |
 
 ## Port strategy
@@ -54,7 +54,7 @@ TZ=Europe/Warsaw
 PIHOLE_DNS_=1.1.1.1;1.0.0.1
 WEBPASSWORD=change-this-now
 VIRTUAL_HOST=pihole.milkyway.lab
-FTLCONF_LOCAL_IPV4=192.168.0.100
+FTLCONF_dns_listeningMode=all
 ```
 
 Notes:
@@ -62,7 +62,8 @@ Notes:
 - `PIHOLE_DNS_` defines the upstream resolvers Pi-hole will forward to.
 - `WEBPASSWORD` is the admin password; never commit the real value.
 - `VIRTUAL_HOST` helps Pi-hole generate correct links.
-- `FTLCONF_LOCAL_IPV4` should match the Raspberry Pi's LAN IP.
+- `FTLCONF_dns_listeningMode=all` makes DNS available on the Raspberry Pi LAN
+  address, not only inside the container or on loopback.
 
 ## 3. Create the standalone Docker Compose file
 
@@ -81,7 +82,7 @@ services:
       PIHOLE_DNS_: ${PIHOLE_DNS_}
       WEBPASSWORD: ${WEBPASSWORD}
       VIRTUAL_HOST: ${VIRTUAL_HOST}
-      FTLCONF_LOCAL_IPV4: ${FTLCONF_LOCAL_IPV4}
+      FTLCONF_dns_listeningMode: ${FTLCONF_dns_listeningMode}
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -103,34 +104,83 @@ docker ps --filter name=pihole-prod
 
 ## 4. Configure local DNS records
 
-### Root record in the Pi-hole UI
+### Enable DNS access from the LAN
+
+Pi-hole must listen on all interfaces so that other LAN clients can use
+`192.168.0.100` as their DNS server. The Compose environment above configures
+this automatically. For an existing container, apply the setting directly:
+
+```bash
+docker exec pihole-prod pihole-FTL --config dns.listeningMode 'ALL'
+docker restart pihole-prod
+sleep 15
+```
+
+Verify the setting:
+
+```bash
+docker exec pihole-prod pihole-FTL --config dns.listeningMode
+```
+
+Expected output:
+
+```text
+ALL
+```
+
+### Root record
 
 Open the admin UI locally:
 
 - `http://127.0.0.1:8081/admin/` from the Pi itself, or
 - through Traefik later as `https://pihole.milkyway.lab/admin/`
 
-In the Pi-hole admin UI:
+Pi-hole v6 stores a single host record in `pihole.toml`. Configure it from
+inside the container using the `name,IP` format required by dnsmasq:
 
-- go to **Local DNS -> DNS Records**
-- add `milkyway.lab` -> `192.168.0.100`
+```bash
+docker exec pihole-prod pihole-FTL --config dns.hostRecord \
+  'milkyway.lab,192.168.0.100'
+```
+
+The same record can also be added through **Local DNS -> DNS Records** in the
+Pi-hole admin UI.
 
 ### Wildcard record for `*.milkyway.lab`
 
-Pi-hole does not expose wildcard A records directly in the normal UI. Use a custom `dnsmasq` file instead.
-
-File: `/mnt/nvme/pihole/etc-dnsmasq.d/02-milkyway-lab.conf`
-
-```ini
-address=/milkyway.lab/192.168.0.100
-address=/.milkyway.lab/192.168.0.100
-```
-
-Reload Pi-hole DNS:
+Pi-hole does not expose wildcard A records directly in the normal UI. Add the
+wildcard through the Pi-hole v6 FTL configuration:
 
 ```bash
-docker exec pihole-prod pihole restartdns
+docker exec pihole-prod pihole-FTL --config misc.dnsmasq_lines \
+  '["address=/.milkyway.lab/192.168.0.100"]'
 ```
+
+Verify both records locally:
+
+```bash
+docker exec pihole-prod dig +short milkyway.lab @127.0.0.1
+docker exec pihole-prod dig +short grafana.milkyway.lab @127.0.0.1
+```
+
+Both commands should return `192.168.0.100`. If the container is restarted,
+the settings are read from the persistent `/etc/pihole/pihole.toml` volume.
+For configuration changes, restart the container:
+
+```bash
+docker restart pihole-prod
+```
+
+Verify from another LAN client, for example Debian:
+
+```bash
+dig @192.168.0.100 milkyway.lab A +short
+dig @192.168.0.100 grafana.milkyway.lab A +short
+```
+
+Both commands should return `192.168.0.100`. If queries work inside the
+container but time out from the LAN, check `dns.listeningMode`; it must be
+`ALL`, not `LOCAL`.
 
 Result:
 
