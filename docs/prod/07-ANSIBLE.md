@@ -35,7 +35,7 @@ Terraform separately from its production module directory and review
 ## Recommended directory structure
 
 ```text
-infrastructure/ansible/
+infrastructure/docker/prod/ansible/
 ├── inventory/
 │   └── prod/
 │       ├── hosts.yml
@@ -59,7 +59,7 @@ infrastructure/ansible/
 
 ## Inventory
 
-File: `infrastructure/ansible/inventory/prod/hosts.yml`
+File: `infrastructure/docker/prod/ansible/inventory/prod/hosts.yml`
 
 ```yaml
 all:
@@ -80,7 +80,7 @@ all:
           ansible_host: 192.168.0.110
 ```
 
-File: `infrastructure/ansible/inventory/prod/group_vars/all.yml`
+File: `infrastructure/docker/prod/ansible/inventory/prod/group_vars/all.yml`
 
 ```yaml
 timezone: Europe/Warsaw
@@ -387,13 +387,13 @@ Use Vault for:
 Create a vault file:
 
 ```bash
-ansible-vault create /mnt/nvme/git/milkyway-test-env/infrastructure/ansible/inventory/prod/group_vars/all/vault.yml
+ansible-vault create /mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/ansible/inventory/prod/group_vars/all/vault.yml
 ```
 
 Edit it later:
 
 ```bash
-ansible-vault edit /mnt/nvme/git/milkyway-test-env/infrastructure/ansible/inventory/prod/group_vars/all/vault.yml
+ansible-vault edit /mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/ansible/inventory/prod/group_vars/all/vault.yml
 ```
 
 Example contents:
@@ -411,7 +411,7 @@ It is not a safe recovery procedure for the current manually configured
 `rpi5-prod-01` until each playbook has been reviewed with `--check --diff`.
 
 ```bash
-cd /mnt/nvme/git/milkyway-test-env/infrastructure/ansible
+cd /mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/ansible
 ansible-playbook -i inventory/prod/hosts.yml playbooks/01-base-setup.yml
 ansible-playbook -i inventory/prod/hosts.yml playbooks/02-storage.yml
 ansible-playbook -i inventory/prod/hosts.yml playbooks/03-pihole.yml
