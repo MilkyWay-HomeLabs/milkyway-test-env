@@ -11,9 +11,19 @@ Some of the groundwork is done, which is easy to miss:
 
 | App | Database | User | Status |
 |---|---|---|---|
-| **element** | MariaDB `test_element` | `element` | DB and user exist (`sql/mariadb/000_create_databases_and_users.sql`); password is `CHANGE_ME` and must be set |
-| **racer** | MariaDB `test_racer` | `racer` | same |
+| **element** | **PostgreSQL** `test_element` | `element` | **Done** — deployed. See the note below |
+| **racer** | MariaDB `test_racer` | `racer` | DB and user exist (`sql/mariadb/000_create_databases_and_users.sql`); password is `CHANGE_ME` and must be set |
 | **puzzel** | MongoDB `test_puzzel` | `puzzel` | DB, user and a `metadata` collection exist (`sql/mongo/000_init_puzzel.js`) |
+
+**Element is deployed and is the exception to most of this page.** It chose PostgreSQL
+(its `D-002`), so the unused MariaDB `test_element` from
+`sql/mariadb/000_create_databases_and_users.sql` is a leftover, not the database it uses —
+the live one is in `sql/postgres/000_create_databases_and_users.sql`. And
+`element-rest-api` is a Spring Boot 4 fat jar on a plain JRE, not a WAR in the shared
+Tomcat image, so it has `jar/element-rest/` and `env/element/element-rest.env` where the
+blocks below assume `tomcat/app/*.war` and a `*.properties` in Tomcat's `conf/`. Read the
+`element-*-test` services in `docker-compose.yml` rather than the paste-ready block for a
+JVM app that ships a jar.
 
 All three are also already listed in `ALLOWED_APPS_HEADERS` in
 `env/tomcat/andromeda-authorization.properties` (`element_rest_api`, `racer_rest_api`).
@@ -114,8 +124,25 @@ docker compose -p test logs -f <app>-rest-test
 # The route works:
 curl -k https://milkyway.test/<app>/app/
 
-# And the segmentation holds — this MUST fail:
-docker exec <app>-rest-test wget -qO- --timeout=3 http://andromeda-auth-test:8080/ \
-  && echo "SEGMENTATION BROKEN: remove auth-net from this container" \
-  || echo "OK: no route to the authorization server"
+# The container is not on auth-net — this MUST print nothing:
+docker inspect <app>-rest-test --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
+  | tr ' ' '\n' | grep -x auth-net
 ```
+
+> **This check used to be a `wget` at `andromeda-auth-test:8080`, expected to fail. It
+> does not fail, and never did.** Andromeda is on `internal` as well as `auth-net` — it
+> needs `internal` for its MariaDB connection and for Prometheus to scrape it — and every
+> REST API is on `internal` too, to reach its own database. So the TCP path exists for
+> `chess-rest-test`, `hacman-rest-test` and `element-rest-test` alike, and a green result
+> from that command only ever meant the container name did not resolve.
+>
+> `auth-net` is not a firewall. What it buys is that Andromeda has **no route from
+> `proxy`**, so it is unreachable from outside; keeping an app off `auth-net` documents
+> intent and keeps the reachable surface from growing. Enforcing "only Nebula may reach
+> the authorization server" at the network layer would mean taking Andromeda off
+> `internal`, which costs it its database and its scrape target. Verify the property you
+> can actually verify — membership — and treat Nebula-only access as a convention the
+> code upholds, not one the network does.
+>
+> Note also that `chess-rest-test` *is* on `auth-net`, contrary to the rule above. That
+> predates the rule and has not been unwound.

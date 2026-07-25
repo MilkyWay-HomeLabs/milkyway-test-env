@@ -41,6 +41,41 @@ http:
       middlewares: [ "strip-resources" ]
       tls: { }
 
+    # --- ELEMENT APP (TEST) ---
+    # No strip anywhere in this block, which makes it the odd one out.
+    #
+    # The two nginx routers are the usual case: both bundles are built with a base
+    # of /element/app/ and /element/game/ and their nginx.conf serves those paths,
+    # so stripping would hand nginx a bare "/" and earn a 404.
+    #
+    # The API is the unusual one. element-rest-api runs with the context path
+    # /element/api (application.yml), so it expects to see the prefix it is
+    # reached by — unlike Robak and Chess, which are deployed at the container
+    # root and therefore need strip-<app>. Adding a strip here would hand it
+    # /v1/... and earn a 404 on every call.
+    element-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/game/`)"
+      entryPoints: [ "https" ]
+      service: "element-game-test-svc"
+      tls: { }
+
+    element-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/app/`)"
+      entryPoints: [ "https" ]
+      service: "element-front-test-svc"
+      priority: 100
+      tls: { }
+
+    # The curated contract at openapi/openapi.yaml is the source of truth and the
+    # UI is pointed at it, so both live under the API's own context path — no
+    # separate swagger router is needed the way Robak has one.
+    element-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/api`)"
+      entryPoints: [ "https" ]
+      service: "element-test-svc"
+      priority: 150
+      tls: { }
+
     # --- ROBAK APP (TEST) ---
     # No strip on the two nginx routers: both bundles are built with a base of
     # /robak/app/ and /robak/game/, and their nginx.conf serves those very paths.
@@ -340,6 +375,15 @@ http:
     robak-front-test-svc:
       loadBalancer:
         servers: [ { url: "http://robak-front-test:80" } ]
+    element-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-rest-test:8080" } ]
+    element-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-front-test:80" } ]
+    element-game-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-game-test:80" } ]
 
     # Dev endpoints
     andromeda-dev-svc:

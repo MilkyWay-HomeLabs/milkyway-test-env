@@ -454,10 +454,69 @@ services:
       proxy:
         ipv4_address: 172.21.0.142
 
+  # --- ELEMENT (rest + front + game) ---
+  #
+  # element-rest-api is a Spring Boot 4 fat jar on a plain JRE, not a WAR in the
+  # shared Tomcat image every older API uses. That is why this block does not look
+  # like the one in docs/future/element-racer-puzzel.yml:
+  #   jar/element-rest/           instead of tomcat/app/*.war
+  #   env/element/element-rest.env  instead of a *.properties in Tomcat's conf/
+  # It also runs on PostgreSQL, not the MariaDB that file assumed (Element D-002).
+  #
+  # JAVA_OPTS is a Tomcat convention and `java -jar` ignores it, so the heap flags
+  # are in the command itself.
+  element-rest-test:
+    image: eclipse-temurin:25-jre
+    container_name: element-rest-test
+    restart: unless-stopped
+    depends_on:
+      - postgres-test
+    command: [ "java", "-Xms512m", "-Xmx1g", "-jar", "/app/element-rest-api.jar" ]
+    env_file:
+      - env/element/element-rest.env
+    volumes:
+      - ./jar/element-rest/element-rest-api.jar:/app/element-rest-api.jar:ro
+      - ../../../resources/test:/app/fileserver
+    networks:
+      # NO auth-net: the accessToken cookie is validated locally against the
+      # shared HS256 secret, so this API never reaches the authorization server.
+      proxy:
+        ipv4_address: 172.21.0.150
+      internal:
+        ipv4_address: 172.22.0.150
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  # The panel and the board are both static Vite bundles served by stock nginx.
+  # nginx.conf is a full config (events/http), so it mounts at /etc/nginx/nginx.conf —
+  # anywhere else and nginx silently runs its default config, with no SPA fallback.
+  # Both bundles are built with their own base path, so Traefik does not strip it.
+  element-front-test:
+    image: nginx:alpine
+    container_name: element-front-test
+    restart: unless-stopped
+    volumes:
+      - ./nginx/element-front/dist:/usr/share/nginx/html/element/app:ro
+      - ./nginx/element-front/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.151
+
+  element-game-test:
+    image: nginx:alpine
+    container_name: element-game-test
+    restart: unless-stopped
+    volumes:
+      - ./nginx/element-game/dist:/usr/share/nginx/html/element/game:ro
+      - ./nginx/element-game/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.152
+
   # --- FUTURE APPS ---
-  # element (.150), racer (.160), puzzel (.170) each get rest + front + game.
-  # MariaDB already holds test_element and test_racer; MongoDB already holds
-  # test_puzzel. See docs/future/ADDING-AN-APP.md for the full checklist and
+  # racer (.160) and puzzel (.170) each get rest + front + game.
+  # MariaDB already holds test_racer; MongoDB already holds test_puzzel. See
+  # docs/future/ADDING-AN-APP.md for the full checklist and
   # docs/future/element-racer-puzzel.yml for ready-to-paste service blocks.
 
 volumes:
