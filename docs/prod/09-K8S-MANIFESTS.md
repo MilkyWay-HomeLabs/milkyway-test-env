@@ -25,6 +25,40 @@ infrastructure/k8s/prod/
     └── robak/
 ```
 
+## Database secrets and MariaDB bootstrap
+
+Database credentials must not be stored in this repository. Keep only an
+example file such as:
+
+```text
+k8s/databases/mariadb/mariadb-prod.env.example
+```
+
+On the production node, create the real file outside the repository with mode
+`0600`, then create/update the Kubernetes Secret from it:
+
+```bash
+sudo install -d -m 0700 /mnt/nvme/k3s/secrets
+sudo install -m 0600 /path/to/mariadb-prod.env /mnt/nvme/k3s/secrets/mariadb-prod.env
+
+sudo k3s kubectl -n milkyway-data create secret generic mariadb-prod-credentials \
+  --from-env-file=/mnt/nvme/k3s/secrets/mariadb-prod.env \
+  --dry-run=client -o yaml \
+  | sudo k3s kubectl apply -f -
+```
+
+Apply the MariaDB workload only after the secret exists:
+
+```bash
+sudo k3s kubectl apply -f /mnt/nvme/git/milkyway-prod-env/k8s/databases/mariadb/mariadb-prod.yaml
+```
+
+The manifest creates an ARM64-compatible MariaDB StatefulSet, a `local-path`
+PVC on `rpi5-prod-01`, the `mariadb-prod` service, and an idempotent bootstrap
+Job. It creates empty production databases for Andromeda, Nebula, Chess, Robak,
+Element, and Racer. Application schemas and seed data are applied separately;
+test databases and test passwords must not be copied into production.
+
 ## Naming convention for production
 
 Use the same rule as test, with a `-prod` suffix:

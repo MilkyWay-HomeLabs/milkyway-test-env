@@ -200,6 +200,42 @@ http:
       middlewares: [ "strip-robak-dev" ]
       tls: { }
 
+    element-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/element/app`)"
+      entryPoints: [ "https" ]
+      service: "element-front-dev-svc"
+      tls: { }
+
+    element-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/element/game`)"
+      entryPoints: [ "https" ]
+      service: "element-game-dev-svc"
+      tls: { }
+
+    # Only /dev is stripped: element-rest-api runs with the context path
+    # /element/api, so the app expects to see it. Stripping /dev/element as the
+    # other APIs do would hand it /api/... and earn a 404 on every call.
+    element-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/element/api`)"
+      entryPoints: [ "https" ]
+      service: "element-dev-svc"
+      middlewares: [ "strip-element-dev" ]
+      tls: { }
+
+    # Vite's HMR socket lives at the host root, so the two dev servers are given
+    # distinct paths rather than fighting over one /@vite-hmr.
+    element-front-hmr-dev:
+      rule: "Host(`milkyway.test`) && Path(`/@vite-hmr-element-app`)"
+      entryPoints: [ "https" ]
+      service: "element-front-dev-svc"
+      tls: { }
+
+    element-game-hmr-dev:
+      rule: "Host(`milkyway.test`) && Path(`/@vite-hmr-element-game`)"
+      entryPoints: [ "https" ]
+      service: "element-game-dev-svc"
+      tls: { }
+
     chess-game-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/game/`)"
       entryPoints: [ "https" ]
@@ -344,6 +380,16 @@ http:
     robak-game-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5176" } ]
+    # Element (M8): panel 5273, board 5373, API 8449 — see the element docs.
+    element-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:8449" } ]
+    element-front-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5273" } ]
+    element-game-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5373" } ]
 
   middlewares:
     #    strip-traefik:
@@ -412,6 +458,8 @@ http:
         prefixes: [ "/dev/robak/app/" ]
     strip-robak-game-dev:
       stripPrefix: { prefixes: [ "/dev/robak/game" ] }
+    strip-element-dev:
+      stripPrefix: { prefixes: [ "/dev" ] }
 
   serversTransports:
     dev-insecure:
