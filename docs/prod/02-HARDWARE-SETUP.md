@@ -4,7 +4,7 @@ This guide prepares the first production node: a **Raspberry Pi 5 (8 GB RAM)** r
 
 > Assumptions used below:
 > - LAN IP reserved for the first node: `192.168.0.100`
-> - SSH user: `wolf`
+> - SSH user: `admin`
 > - Repository checkout path: `/mnt/nvme/git/milkyway-test-env`
 > - NVMe device: `/dev/nvme0n1`
 
@@ -20,7 +20,7 @@ This guide prepares the first production node: a **Raspberry Pi 5 (8 GB RAM)** r
 4. Boot the Pi and update the base system:
 
 ```bash
-ssh wolf@192.168.0.100
+ssh admin@192.168.0.100
 sudo apt-get update
 sudo apt-get dist-upgrade -y
 sudo apt-get install -y curl git vim jq ca-certificates gnupg lsb-release nfs-common open-iscsi
@@ -73,7 +73,7 @@ Create the core directory layout immediately:
 
 ```bash
 sudo mkdir -p /mnt/nvme/{git,k3s/traefik/certs,pihole,etc,backups}
-sudo chown -R wolf:wolf /mnt/nvme
+sudo chown -R admin:admin /mnt/nvme
 ```
 
 ## 3. Reserve a static IP on the router
@@ -116,10 +116,10 @@ sudo systemctl reload ssh
 Add your public key if it was not injected during imaging:
 
 ```bash
-mkdir -p /home/wolf/.ssh
-chmod 700 /home/wolf/.ssh
-cat >> /home/wolf/.ssh/authorized_keys
-chmod 600 /home/wolf/.ssh/authorized_keys
+mkdir -p /home/admin/.ssh
+chmod 700 /home/admin/.ssh
+cat >> /home/admin/.ssh/authorized_keys
+chmod 600 /home/admin/.ssh/authorized_keys
 ```
 
 Optional but sensible extras:
@@ -141,7 +141,7 @@ Install Docker:
 
 ```bash
 curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker wolf
+sudo usermod -aG docker admin
 sudo systemctl enable --now docker
 ```
 

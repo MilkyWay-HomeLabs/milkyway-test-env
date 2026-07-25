@@ -47,16 +47,16 @@ K3s writes the admin kubeconfig to:
 Copy it to the user account:
 
 ```bash
-mkdir -p /home/wolf/.kube
-sudo cp /etc/rancher/k3s/k3s.yaml /home/wolf/.kube/config
-sudo chown wolf:wolf /home/wolf/.kube/config
-chmod 600 /home/wolf/.kube/config
+mkdir -p /home/admin/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml /home/admin/.kube/config
+sudo chown admin:admin /home/admin/.kube/config
+chmod 600 /home/admin/.kube/config
 ```
 
 Replace `127.0.0.1` with the server IP if you want to use it from another machine:
 
 ```bash
-sed -i 's/127.0.0.1/192.168.0.100/' /home/wolf/.kube/config
+sed -i 's/127.0.0.1/192.168.0.100/' /home/admin/.kube/config
 ```
 
 Then from a remote admin workstation:
@@ -68,17 +68,21 @@ kubectl get nodes
 
 ## 3. Namespace structure
 
+When running these commands directly on the K3s server, use `sudo k3s kubectl`
+because the default kubeconfig is readable only by root. From a remote admin
+workstation, use `kubectl` after configuring `KUBECONFIG` above.
+
 Create the production namespaces:
 
 ```bash
-kubectl create namespace milkyway-infra --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace milkyway-monitoring --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace milkyway-data --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace milkyway-apps --dry-run=client -o yaml | kubectl apply -f -
-kubectl label namespace milkyway-infra name=milkyway-infra --overwrite
-kubectl label namespace milkyway-monitoring name=milkyway-monitoring --overwrite
-kubectl label namespace milkyway-data name=milkyway-data --overwrite
-kubectl label namespace milkyway-apps name=milkyway-apps --overwrite
+sudo k3s kubectl create namespace milkyway-infra --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+sudo k3s kubectl create namespace milkyway-monitoring --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+sudo k3s kubectl create namespace milkyway-data --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+sudo k3s kubectl create namespace milkyway-apps --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+sudo k3s kubectl label namespace milkyway-infra name=milkyway-infra --overwrite
+sudo k3s kubectl label namespace milkyway-monitoring name=milkyway-monitoring --overwrite
+sudo k3s kubectl label namespace milkyway-data name=milkyway-data --overwrite
+sudo k3s kubectl label namespace milkyway-apps name=milkyway-apps --overwrite
 ```
 
 Roles of each namespace:
@@ -92,20 +96,31 @@ Roles of each namespace:
 
 Use Helm for Traefik so Terraform can manage it cleanly later.
 
+Install Helm on the K3s server if it is not already installed:
+
+```bash
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version
+```
+
+Because the K3s admin kubeconfig is readable only by root, run the Helm
+commands below with `sudo` when working directly on the server and pass the
+K3s kubeconfig explicitly with `--kubeconfig`.
+
 Add the Helm repo:
 
 ```bash
-helm repo add traefik https://traefik.github.io/charts
-helm repo update
+sudo helm repo add traefik https://traefik.github.io/charts
+sudo helm repo update
 ```
 
 Example install using NodePort:
 
 ```bash
-helm upgrade --install traefik traefik/traefik \
+sudo helm --kubeconfig /etc/rancher/k3s/k3s.yaml upgrade --install traefik traefik/traefik \
   --namespace milkyway-infra \
   --create-namespace \
-  --set deployment.podLabels.app\.kubernetes\.io/name=traefik \
+  --set-string 'deployment.podLabels.app\.kubernetes\.io/name=traefik' \
   --set service.type=NodePort \
   --set ports.web.nodePort=30080 \
   --set ports.websecure.nodePort=30443 \

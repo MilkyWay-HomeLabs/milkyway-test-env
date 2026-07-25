@@ -42,7 +42,7 @@ Directly binding Pi-hole to `80:80` only works if:
 
 ```bash
 sudo mkdir -p /mnt/nvme/pihole/{etc-pihole,etc-dnsmasq.d}
-sudo chown -R wolf:wolf /mnt/nvme/pihole
+sudo chown -R admin:admin /mnt/nvme/pihole
 ```
 
 ## 2. Create the Pi-hole `.env`

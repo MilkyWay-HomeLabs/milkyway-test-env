@@ -38,7 +38,7 @@ File: `infrastructure/ansible/inventory/prod/hosts.yml`
 ```yaml
 all:
   vars:
-    ansible_user: wolf
+    ansible_user: admin
     ansible_python_interpreter: /usr/bin/python3
     milkyway_domain: milkyway.lab
     milkyway_ingress_ip: 192.168.0.100
@@ -235,19 +235,19 @@ File: `playbooks/04-k3s-server.yml`
 
     - name: Ensure kubeconfig directory exists
       ansible.builtin.file:
-        path: /home/wolf/.kube
+        path: /home/admin/.kube
         state: directory
-        owner: wolf
-        group: wolf
+        owner: admin
+        group: admin
         mode: '0700'
 
     - name: Copy kubeconfig for user
       ansible.builtin.copy:
         src: /etc/rancher/k3s/k3s.yaml
-        dest: /home/wolf/.kube/config
+        dest: /home/admin/.kube/config
         remote_src: true
-        owner: wolf
-        group: wolf
+        owner: admin
+        group: admin
         mode: '0600'
 ```
 

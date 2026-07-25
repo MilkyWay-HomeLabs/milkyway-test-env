@@ -17,7 +17,7 @@ All files live under:
 
 ```bash
 sudo mkdir -p /mnt/nvme/k3s/traefik/certs
-sudo chown -R wolf:wolf /mnt/nvme/k3s/traefik/certs
+sudo chown -R admin:admin /mnt/nvme/k3s/traefik/certs
 ```
 
 ## 2. Generate the Root CA (4096-bit RSA, 10 years)
@@ -95,13 +95,32 @@ Confirm that:
 
 ## 6. Use the certificate with Traefik
 
+Run the Kubernetes commands from a machine that has access to the cluster. On the
+K3s server itself, use `sudo k3s kubectl`; this does not require a separate
+`kubectl` binary or a user kubeconfig. If you are using a remote admin
+workstation, use `kubectl` after configuring `KUBECONFIG` as described in
+`05-K3S-KUBERNETES.md`.
+
 ### Option A — Kubernetes TLS Secret (recommended)
+
+On the K3s server:
+
+```bash
+sudo k3s kubectl create namespace milkyway-infra --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+sudo k3s kubectl -n milkyway-infra create secret tls milkyway-lab-tls \
+  --cert=/mnt/nvme/k3s/traefik/certs/milkyway.lab.crt \
+  --key=/mnt/nvme/k3s/traefik/certs/milkyway.lab.key \
+  --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+```
+
+From a remote workstation with `KUBECONFIG` configured, remove the `sudo k3s`
+prefix from each command:
 
 ```bash
 kubectl create namespace milkyway-infra --dry-run=client -o yaml | kubectl apply -f -
 kubectl -n milkyway-infra create secret tls milkyway-lab-tls \
-  --cert=/mnt/nvme/k3s/traefik/certs/milkyway.lab.crt \
-  --key=/mnt/nvme/k3s/traefik/certs/milkyway.lab.key \
+  --cert=/path/to/milkyway.lab.crt \
+  --key=/path/to/milkyway.lab.key \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
@@ -244,10 +263,10 @@ openssl x509 -req \
   -out /mnt/nvme/k3s/traefik/certs/milkyway.lab.crt \
   -days 730 -sha256 \
   -extfile /mnt/nvme/k3s/traefik/certs/milkyway.lab.ext
-kubectl -n milkyway-infra create secret tls milkyway-lab-tls \
+sudo k3s kubectl -n milkyway-infra create secret tls milkyway-lab-tls \
   --cert=/mnt/nvme/k3s/traefik/certs/milkyway.lab.crt \
   --key=/mnt/nvme/k3s/traefik/certs/milkyway.lab.key \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | sudo k3s kubectl apply -f -
 ```
 
 Set a calendar reminder **60 days before expiry**.

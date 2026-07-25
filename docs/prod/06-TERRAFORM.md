@@ -36,6 +36,63 @@ Suggested clone path on the Pi:
 /mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod/
 ```
 
+## Creating the Terraform project on the Pi
+
+The directory above is a target location; Terraform does not create the
+project files automatically. First put the repository containing the
+`infrastructure/terraform/prod/` directory on the Pi. For a repository with a
+remote Git URL:
+
+```bash
+sudo mkdir -p /mnt/nvme/git
+sudo chown admin:admin /mnt/nvme/git
+git clone <REPOSITORY_URL> /mnt/nvme/git/milkyway-test-env
+```
+
+If the repository is already present, update it instead:
+
+```bash
+cd /mnt/nvme/git/milkyway-test-env
+git pull
+```
+
+If the repository exists only on another computer, copy it to the same target
+path with `rsync` or `scp`. Then create the Terraform layout:
+
+```bash
+cd /mnt/nvme/git/milkyway-test-env
+mkdir -p infrastructure/terraform/prod/modules/{namespaces,networking,traefik,monitoring,databases,apps}
+mkdir -p infrastructure/terraform/prod/environments/prod
+cd infrastructure/terraform/prod
+```
+
+Save the configuration examples in this document as the corresponding files:
+
+```text
+providers.tf
+variables.tf
+main.tf
+modules/namespaces/main.tf
+modules/networking/main.tf
+modules/traefik/main.tf
+environments/prod/terraform.tfvars
+```
+
+The `monitoring`, `databases`, and `apps` module directories can remain empty
+until those workloads are added to `main.tf`. Terraform requires real `.tf`
+files; creating only empty directories is not enough.
+
+Before running Terraform, verify the working directory and kubeconfig:
+
+```bash
+cd /mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod
+test -f providers.tf && test -f variables.tf && test -f main.tf
+test -f /home/admin/.kube/config
+KUBECONFIG=/home/admin/.kube/config kubectl get nodes
+```
+
+Do not run `terraform apply` until `terraform plan` has been reviewed.
+
 ## What Terraform should own
 
 Good Terraform targets in this project:
@@ -89,7 +146,7 @@ provider "helm" {
 variable "kubeconfig_path" {
   type        = string
   description = "Absolute path to the kubeconfig used for the production cluster"
-  default     = "/home/wolf/.kube/config"
+  default     = "/home/admin/.kube/config"
 }
 
 variable "domain" {
@@ -193,7 +250,7 @@ resource "helm_release" "traefik" {
   namespace  = "milkyway-infra"
   repository = "https://traefik.github.io/charts"
   chart      = "traefik"
-  version    = "34.4.1"
+  version    = "41.0.2"
 
   values = [yamlencode({
     deployment = {
@@ -268,7 +325,7 @@ resource "kubernetes_network_policy_v1" "allow_auth_net" {
 File: `environments/prod/terraform.tfvars`
 
 ```hcl
-kubeconfig_path       = "/home/wolf/.kube/config"
+kubeconfig_path       = "/home/admin/.kube/config"
 domain                = "milkyway.lab"
 traefik_tls_cert_path = "/mnt/nvme/k3s/traefik/certs/milkyway.lab.crt"
 traefik_tls_key_path  = "/mnt/nvme/k3s/traefik/certs/milkyway.lab.key"
