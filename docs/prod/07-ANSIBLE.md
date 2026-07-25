@@ -2,6 +2,32 @@
 
 This document describes the Ansible structure for provisioning the production Raspberry Pi node and future worker nodes.
 
+## When to run Ansible
+
+On a fresh host, run Ansible before Terraform. Ansible owns the operating
+system and host-level prerequisites; Terraform owns resources inside the K3s
+cluster.
+
+For the current `rpi5-prod-01` host, K3s, the namespaces, Traefik, and the TLS
+secret were already configured manually by following documents 04 and 05.
+Do not run the complete playbook sequence below against this host blindly: it
+may reinstall or alter components that are already working. First run any
+relevant playbook with `--check --diff`, compare its intended state with the
+current host, and then run only the missing or deliberately adopted tasks.
+
+The recommended ownership split is:
+
+| Area | Owner |
+|---|---|
+| OS packages, mounts, Docker, K3s installation | Ansible |
+| Certificates generated on the host | Ansible or the documented manual process |
+| Namespaces, Helm releases, TLS Secrets, NetworkPolicies and workloads | Terraform |
+| Container image builds and rollout image updates | CI/CD |
+
+Ansible should prepare the host; it should not invoke `terraform apply`. Run
+Terraform separately from its production module directory and review
+`terraform plan` before applying it.
+
 ## Version
 
 - Ansible: **`>= 2.15`**
@@ -329,7 +355,10 @@ Important snippet:
 
 File: `playbooks/07-deploy-apps.yml`
 
-This playbook should apply raw manifests or trigger Terraform from the server node.
+This playbook may apply raw manifests when Ansible is the chosen deployment
+owner. If Terraform owns the cluster objects, do not make this playbook invoke
+Terraform; run Terraform separately so its state remains in the expected
+working directory.
 
 Example direct `kubectl` pattern:
 
@@ -343,7 +372,8 @@ Example direct `kubectl` pattern:
         kubectl apply -f /mnt/nvme/git/milkyway-test-env/infrastructure/k8s/prod/
 ```
 
-If Terraform owns the cluster objects, replace that shell step with `terraform init` + `terraform apply`.
+If Terraform owns the cluster objects, omit this playbook or use it only for
+host-level preparation.
 
 ## Secrets with Ansible Vault
 
@@ -374,7 +404,11 @@ vault_mariadb_root_password: change-me
 vault_postgres_password: change-me
 ```
 
-## Running playbooks
+## Running playbooks on a fresh host
+
+The following sequence is for a new host that has not already been configured.
+It is not a safe recovery procedure for the current manually configured
+`rpi5-prod-01` until each playbook has been reviewed with `--check --diff`.
 
 ```bash
 cd /mnt/nvme/git/milkyway-test-env/infrastructure/ansible

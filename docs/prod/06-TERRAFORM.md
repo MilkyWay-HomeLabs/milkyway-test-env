@@ -36,6 +36,33 @@ Suggested clone path on the Pi:
 /mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod/
 ```
 
+## Install Terraform on Debian 13
+
+Install Terraform on the machine where the Terraform commands will run. For
+the Raspberry Pi running Debian 13 (`trixie`):
+
+```bash
+sudo apt-get update
+sudo apt-get install -y curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+
+curl -fsSL https://apt.releases.hashicorp.com/gpg \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/hashicorp.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com trixie main" \
+  | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+sudo apt-get update
+sudo apt-get install -y terraform
+terraform version
+```
+
+Run `terraform init` only after changing into a directory containing the
+Terraform `.tf` files. If `cd` reports `No such file or directory`, stop and
+fix the project path first. The shell remains in the previous directory after
+a failed `cd`, so running `terraform init` immediately afterwards can
+accidentally initialize an empty home directory.
+
 ## Creating the Terraform project on the Pi
 
 The directory above is a target location; Terraform does not create the
