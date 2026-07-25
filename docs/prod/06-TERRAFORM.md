@@ -13,7 +13,7 @@ This document defines the recommended Terraform layout for provisioning MilkyWay
 ## Recommended directory structure
 
 ```text
-infrastructure/terraform/prod/
+infrastructure/docker/prod/terraform/
 ├── main.tf
 ├── variables.tf
 ├── outputs.tf
@@ -33,7 +33,7 @@ infrastructure/terraform/prod/
 Suggested clone path on the Pi:
 
 ```text
-/mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod/
+/mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/terraform/
 ```
 
 ## Install Terraform on Debian 13
@@ -67,7 +67,7 @@ accidentally initialize an empty home directory.
 
 The directory above is a target location; Terraform does not create the
 project files automatically. First put the repository containing the
-`infrastructure/terraform/prod/` directory on the Pi. For a repository with a
+`infrastructure/docker/prod/terraform/` directory on the Pi. For a repository with a
 remote Git URL:
 
 ```bash
@@ -83,14 +83,15 @@ cd /mnt/nvme/git/milkyway-test-env
 git pull
 ```
 
-If the repository exists only on another computer, copy it to the same target
-path with `rsync` or `scp`. Then create the Terraform layout:
+If the repository exists only on another computer, copy the production
+directory to the same target path with `rsync` or `scp`. Then create the
+Terraform layout:
 
 ```bash
 cd /mnt/nvme/git/milkyway-test-env
-mkdir -p infrastructure/terraform/prod/modules/{namespaces,networking,traefik,monitoring,databases,apps}
-mkdir -p infrastructure/terraform/prod/environments/prod
-cd infrastructure/terraform/prod
+mkdir -p infrastructure/docker/prod/terraform/modules/{namespaces,networking,traefik,monitoring,databases,apps}
+mkdir -p infrastructure/docker/prod/terraform/environments/prod
+cd infrastructure/docker/prod/terraform
 ```
 
 Save the configuration examples in this document as the corresponding files:
@@ -112,7 +113,7 @@ files; creating only empty directories is not enough.
 Before running Terraform, verify the working directory and kubeconfig:
 
 ```bash
-cd /mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod
+cd /mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/terraform
 test -f providers.tf && test -f variables.tf && test -f main.tf
 test -f /home/admin/.kube/config
 KUBECONFIG=/home/admin/.kube/config kubectl get nodes
@@ -369,7 +370,7 @@ Good enough for a home lab when one admin operates the cluster.
 Example state location:
 
 ```text
-/mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod/terraform.tfstate
+/mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/terraform/terraform.tfstate
 ```
 
 ### Option B — remote state
@@ -387,7 +388,7 @@ For a home lab, local state is acceptable. Remote state is a convenience upgrade
 Run Terraform from the production module root:
 
 ```bash
-cd /mnt/nvme/git/milkyway-test-env/infrastructure/terraform/prod
+cd /mnt/nvme/git/milkyway-test-env/infrastructure/docker/prod/terraform
 terraform init
 terraform plan -var-file=environments/prod/terraform.tfvars
 terraform apply -var-file=environments/prod/terraform.tfvars
