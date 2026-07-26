@@ -1,4 +1,4 @@
-# Status — 2026-07-25
+# Status — 2026-07-26
 
 Where the environment stands, and what is still open.
 
@@ -76,8 +76,30 @@ Each of these was invisible while the system appeared to work:
    *before* writing anything, so the result is an empty file rather than a partial one —
    the same silent shape as bug 2. Both grants are now in
    `sql/postgres/000_create_databases_and_users.sql`.
+9. **`APP_JWT_SECRET` is Base64, and an app that reads it as raw bytes rejects every real
+   token** (found 2026-07-26, while running Element's cross-service e2e suite). Andromeda
+   signs with `Keys.hmacShaKeyFor(Decoders.BASE64.decode(APP_JWT_SECRET))`, so the
+   configured value is the *encoding* of the key, not the key. `element-rest-api` took the
+   string's UTF-8 bytes instead and derived a key that verified nothing the platform
+   issues: every authenticated request answered `401 AUTH_REQUIRED` in the deployed
+   environment, while its own tests passed because they signed the same wrong way the
+   parser verified. Two more facts a new app needs: the token is **HS384**, not HS256, so
+   do not pin the algorithm on the parser; and its subject is the **user id alone** — the
+   `"<userId>,<email>"` composite other platform APIs document is not what Andromeda
+   sends, so an app that splits on the comma must tolerate its absence. An app that
+   validates the cookie locally is not integrated until a token Andromeda actually issued
+   has been through it.
 
 ## Still open
+
+**Andromeda writes a malformed `Expires` on its cookies** (found 2026-07-26).
+`Set-Cookie: ...; Expires=Sun 26 Jul 2026 095759 GMT` — no comma after the weekday and no
+colons in the time, so it parses as neither RFC 1123 nor any of the fallbacks. Browsers
+prefer `Max-Age`, which is why sign-in works everywhere and nobody noticed; a cookie jar
+that parses what it can (Playwright's, for one) lands on midnight of that day and drops
+the access cookie as already expired. Not this environment's file to fix — recorded here
+because it makes any non-browser client of the platform look broken for no visible reason.
+
 
 **TLS certificate.** `traefik/certs/milkyway.key` was in the public history. Regenerate and
 re-trust. Low urgency (self-signed, test only), but do it.
