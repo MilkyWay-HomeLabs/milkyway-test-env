@@ -14,16 +14,34 @@ not strip the prefix.
 
 ## Deploying a new build
 
-From the `element-rest-api` checkout (no local JDK needed):
+```bash
+./scripts/deploy-element.sh api
+```
+
+That builds in a Maven container (no local JDK), archives the running jar, swaps the new
+one in, recreates the container and does not return until
+`https://milkyway.test/element/api/v1/version` answers 200. `front` / `game` / no argument
+deploy the bundles / all three.
+
+By hand it is:
 
 ```bash
 docker run --rm -v "$PWD":/app -w /app maven:3.9-eclipse-temurin-25 mvn -B -DskipTests package
-cp target/element-rest-api-*.jar <this-dir>/element-rest-api.jar
-docker compose -p test up -d --no-deps element-rest-test
+cp target/element-rest-api-*.jar <this-dir>/.element-rest-api.jar.new
+mv <this-dir>/.element-rest-api.jar.new <this-dir>/element-rest-api.jar
+docker compose -p test up -d --no-deps --force-recreate element-rest-test
 ```
 
-`--no-deps` matters: this directory's `env/db/postgres.env` is also read by `postgres-test`
-and `backup-test`, so without it compose offers to recreate the databases.
+Three details, each learned the hard way:
+
+- **Write-and-rename, never `cp` over the jar.** It is bind-mounted into a running JVM, so
+  overwriting it in place mutates the file that process has open: the app keeps answering
+  until it needs a class it had not loaded, then dies with `ClassNotFoundException` on
+  Logback internals and stops responding entirely while the container still reports `Up`.
+- **`--force-recreate`.** A bind-mounted file changing is invisible to compose; a plain
+  `up -d` reports the container up to date and leaves the *old* build running.
+- **`--no-deps`.** This directory's `env/db/postgres.env` is also read by `postgres-test`
+  and `backup-test`, so without it compose offers to recreate the databases.
 
 Keep the previous jar in `archive/` (gitignored) for a quick rollback.
 
