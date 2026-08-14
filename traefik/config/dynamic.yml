@@ -41,6 +41,43 @@ http:
       middlewares: [ "strip-resources" ]
       tls: { }
 
+    # --- HUB (TEST) ---
+    #
+    # `/hub/app/` is not stripped: the bundle is built with that base
+    # (frontend/vite.config.ts in the hub repository) and nginx serves that very path, so
+    # stripping would hand nginx a bare "/" and earn a 404 — the same rule as
+    # robak-front-test and element-front-test.
+    #
+    # `/hub/api` *is* stripped, and that is the one asymmetry in this block. The backend
+    # runs with root_path="/hub", so it routes on /api/v1/... and still writes /hub into
+    # the OpenAPI document's server URL. Strip and root_path are two halves of one
+    # decision: remove either and the interactive docs generate a client that calls the
+    # wrong URL.
+    hub-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hub/app/`)"
+      entryPoints: [ "https" ]
+      service: "hub-front-test-svc"
+      priority: 100
+      tls: { }
+
+    hub-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hub/api`)"
+      entryPoints: [ "https" ]
+      service: "hub-rest-test-svc"
+      middlewares: [ "strip-hub" ]
+      priority: 150
+      tls: { }
+
+    # FastAPI serves the interactive docs and the schema off the application root, so they
+    # arrive on the same service through the same strip. Separate from the API router
+    # because they are separate paths, not because they are configured differently.
+    hub-docs-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/hub/docs`) || PathPrefix(`/hub/openapi.json`))"
+      entryPoints: [ "https" ]
+      service: "hub-rest-test-svc"
+      middlewares: [ "strip-hub" ]
+      tls: { }
+
     # --- ELEMENT APP (TEST) ---
     # No strip anywhere in this block, which makes it the odd one out.
     #
@@ -384,6 +421,12 @@ http:
     element-game-test-svc:
       loadBalancer:
         servers: [ { url: "http://element-game-test:80" } ]
+    hub-rest-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hub-rest-test:8000" } ]
+    hub-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hub-front-test:80" } ]
 
     # Dev endpoints
     andromeda-dev-svc:
@@ -442,6 +485,11 @@ http:
     strip-resources:
       stripPrefix:
         prefixes: [ "/resources" ]
+    # One prefix, not two. `/hub/api` and `/hub/docs` both lose exactly `/hub`, which is
+    # what the backend's root_path expects to have been removed.
+    strip-hub:
+      stripPrefix:
+        prefixes: [ "/hub" ]
     strip-andromeda:
       stripPrefix:
         prefixes: [ "/andromeda" ]

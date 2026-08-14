@@ -27,3 +27,18 @@ scrape_configs:
   # hacman-front-test lives on `proxy` only and is unreachable from Prometheus on
   # `internal`. Scraping it would need a second network membership; left out until
   # its metrics are actually wanted.
+
+  # MilkyWayHub, the system of record for this lab. No `metrics_path`: it answers on the
+  # standard /metrics. Scraped container-to-container on `internal` like everything else
+  # here — through Traefik a scrape would depend on the router, the certificate and the
+  # strip-hub middleware, and each of those failing would read as the Hub being down.
+  #
+  # hub-front-test is not scraped, for the same reason hacman-front-test is not: proxy
+  # only, and static files.
+  #
+  # What it publishes is the Hub's own health as numbers — hub_backup_age_seconds,
+  # hub_probe_state, hub_database_reachable — which is the one question the Hub cannot
+  # answer about itself. Source of this block: repo/dev/milkyway-hub/deploy/prometheus.hub.yml.
+  - job_name: 'hub-rest'
+    static_configs:
+      - targets: [ 'hub-rest-test:8000' ]
