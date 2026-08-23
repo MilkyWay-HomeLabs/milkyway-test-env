@@ -107,7 +107,7 @@ network you are looking at.
 | Range | Assigned to |
 |---|---|
 | `.2` | `traefik-test` |
-| `.3` – `.9` | infrastructure — prometheus `.3`, grafana `.4`, node-exporter `.5`, loki `.6`, promtail `.7`, fileserver `.8`, backup `.9` |
+| `.3` – `.19` | infrastructure — prometheus `.3`, grafana `.4`, node-exporter `.5`, loki `.6`, promtail `.7`, fileserver `.8`, backup `.9`, docker-proxy `.10` |
 | `.30` – `.39` | databases — mariadb `.31`, postgres `.32`, mongo `.33` |
 | `.100` – `.179` | applications, one 10-address block each |
 
