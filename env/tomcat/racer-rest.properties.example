@@ -1,0 +1,16 @@
+# Racer authenticates through Nebula, never against Andromeda directly — no
+# ANDROMEDA_AUTH_SERV_URL, no HEADER_FOR_AUTH_SERVER here. Adding either would recreate
+# the coupling this architecture exists to prevent (see docs/future/ADDING-AN-APP.md and
+# racer-docs/plan/09-infrastructure-changes.md R-5).
+RACER_DB_URL=jdbc:mariadb://mariadb-test:3306/test_racer
+RACER_USERNAME=racer
+RACER_PASSWORD=CHANGE_ME
+RACER_TEST_DB_URL=jdbc:mariadb://mariadb-test:3306/test_racer
+RACER_TEST_USERNAME=racer
+RACER_TEST_PASSWORD=CHANGE_ME
+APP_JWT_SECRET=CHANGE_ME
+NEBULA_API_URL=http://nebula-rest-test:8080/api/v1
+APP_RESOURCES_BASE_URL=https://milkyway.test/resources/racer/
+CORS_ALLOWED_ORIGIN_PATTERNS=https://milkyway.test,https://*.milkyway.test,https://milkyway.inet,https://*.milkyway.inet,https://*.milkyway,https://*.test.milkyway,https://*.dev.milkyway
+SPRING_SECURITY_USERNAME=racer
+SPRING_SECURITY_PASSWORD=CHANGE_ME

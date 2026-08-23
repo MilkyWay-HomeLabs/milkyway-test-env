@@ -42,3 +42,12 @@ scrape_configs:
   - job_name: 'hub-rest'
     static_configs:
       - targets: [ 'hub-rest-test:8000' ]
+
+  # racer-rest-test does not exist yet (no WAR) — this target is unreachable and the
+  # job shows as `down` until docker-compose.yml's racer-rest-test is uncommented.
+  # racer-front-test and racer-game-test stay unscraped for the same reason as every
+  # other front/game: proxy-only, unreachable from `internal`.
+  - job_name: 'racer-rest-test'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'racer-rest-test:8080' ]

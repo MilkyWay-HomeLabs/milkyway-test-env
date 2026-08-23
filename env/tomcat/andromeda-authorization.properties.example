@@ -21,4 +21,4 @@ ANDROMEDA_TEST_DB_PASSWORD=your_db_password
 
 NEBULA_FRONT_APP_URL=https://milkyway.test/nebula/
 NEBULA_CONFIRMATION_MAIL_URL=https://milkyway.test/nebula/confirm/
-ALLOWED_APPS_HEADERS=nebula_rest_api,chess_rest_api,robak_rest_api,racer_rest_api
+ALLOWED_APPS_HEADERS=nebula_rest_api,chess_rest_api,robak_rest_api

@@ -513,9 +513,64 @@ services:
       proxy:
         ipv4_address: 172.21.0.152
 
+  # --- RACER (rest + front + game) ---
+  # All three are commented out: none of racer-rest-api's WAR, racer-front's dist or
+  # racer-game's dist exist on disk yet. Docker would create a directory where each file
+  # should be and Tomcat would restart-loop the same way robak-rest-test does above;
+  # uncomment each service individually once its artifact lands, following
+  # docs/future/ADDING-AN-APP.md. Traefik's racer-*-test routers already exist in
+  # traefik/config/dynamic.yml and answer 502 in the meantime, as expected.
+  #
+  # racer-rest-test:
+  #   image: tomcat:10.1-jdk25-temurin
+  #   container_name: racer-rest-test
+  #   restart: unless-stopped
+  #   env_file:
+  #     - env/tomcat/.env
+  #   environment:
+  #     - JAVA_OPTS=-Xms512m -Xmx1g
+  #   volumes:
+  #     - ./tomcat/app/racer-rest-api##latest.war:/usr/local/tomcat/webapps/ROOT.war:ro
+  #     - ./tomcat/setenv/racer/setenv.sh:/usr/local/tomcat/bin/setenv.sh:ro
+  #     - ./env/tomcat/racer-rest.properties:/usr/local/tomcat/conf/racer-rest.properties:ro
+  #     - ../../../resources/test:/app/fileserver
+  #     - ./traefik/certs/milkyway.crt:/usr/local/share/ca-certificates/milkyway.crt:ro
+  #   networks:
+  #     proxy:
+  #       ipv4_address: 172.21.0.160
+  #     internal:
+  #       ipv4_address: 172.22.0.160
+  #   extra_hosts:
+  #     - "milkyway.test:172.21.0.2"
+  #
+  # racer-front-test:
+  #   image: nginx:alpine
+  #   container_name: racer-front-test
+  #   restart: unless-stopped
+  #   env_file:
+  #     - env/nginx/racer-front/.env
+  #   volumes:
+  #     - ./nginx/racer-front/dist:/usr/share/nginx/html/racer/app:ro
+  #     - ./nginx/racer-front/nginx.conf:/etc/nginx/nginx.conf:ro
+  #   networks:
+  #     proxy:
+  #       ipv4_address: 172.21.0.161
+  #
+  # racer-game-test:
+  #   image: nginx:alpine
+  #   container_name: racer-game-test
+  #   restart: unless-stopped
+  #   env_file:
+  #     - env/nginx/racer-game/.env
+  #   volumes:
+  #     - ./nginx/racer-game/dist:/usr/share/nginx/html/racer/game:ro
+  #     - ./nginx/racer-game/nginx.conf:/etc/nginx/nginx.conf:ro
+  #   networks:
+  #     proxy:
+  #       ipv4_address: 172.21.0.162
+
   # --- FUTURE APPS ---
-  # racer (.160) and puzzel (.170) each get rest + front + game.
-  # MariaDB already holds test_racer; MongoDB already holds test_puzzel. See
+  # puzzel (.170) gets rest + front + game. MongoDB already holds test_puzzel. See
   # docs/future/ADDING-AN-APP.md for the full checklist and
   # docs/future/element-racer-puzzel.yml for ready-to-paste service blocks.
 

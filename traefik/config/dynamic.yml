@@ -145,6 +145,42 @@ http:
       priority: 150
       tls: { }
 
+    # --- RACER APP (TEST) ---
+    # racer-rest-test does not exist yet (no WAR) — these routers resolve to nothing
+    # and answer 502 until P3-2 in docker-compose.yml is uncommented, which is expected,
+    # not a bug (see docs/future/ADDING-AN-APP.md).
+    #
+    # No strip on the two nginx routers: both bundles are built with a base of
+    # /racer/app/ and /racer/game/, and their nginx.conf serves those very paths.
+    # Stripping the prefix would hand nginx a bare "/" and earn a 404.
+    racer-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/racer/game/`)"
+      entryPoints: [ "https" ]
+      service: "racer-game-test-svc"
+      tls: { }
+
+    racer-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/racer/app/`)"
+      entryPoints: [ "https" ]
+      service: "racer-front-test-svc"
+      priority: 100
+      tls: { }
+
+    racer-swagger-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/racer/swagger-ui`) || PathPrefix(`/racer/v3/api-docs`))"
+      entryPoints: [ "https" ]
+      service: "racer-test-svc"
+      middlewares: [ "strip-racer" ]
+      tls: { }
+
+    racer-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/racer/api`)"
+      entryPoints: [ "https" ]
+      service: "racer-test-svc"
+      middlewares: [ "strip-racer" ]
+      priority: 150
+      tls: { }
+
     # --- CHESS APP (TEST) ---
     chess-game-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/chess/game/`)"
@@ -270,6 +306,26 @@ http:
       entryPoints: [ "https" ]
       service: "robak-dev-svc"
       middlewares: [ "strip-robak-dev" ]
+      tls: { }
+
+    racer-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/racer/game/`)"
+      entryPoints: [ "https" ]
+      service: "racer-game-dev-svc"
+      middlewares: [ "strip-racer-game-dev" ]
+      tls: { }
+
+    racer-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/racer/app`)"
+      entryPoints: [ "https" ]
+      service: "racer-front-dev-svc"
+      tls: { }
+
+    racer-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/racer/api`)"
+      entryPoints: [ "https" ]
+      service: "racer-dev-svc"
+      middlewares: [ "strip-racer-dev" ]
       tls: { }
 
     element-front-dev:
@@ -412,6 +468,15 @@ http:
     robak-front-test-svc:
       loadBalancer:
         servers: [ { url: "http://robak-front-test:80" } ]
+    racer-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://racer-rest-test:8080" } ]
+    racer-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://racer-front-test:80" } ]
+    racer-game-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://racer-game-test:80" } ]
     element-test-svc:
       loadBalancer:
         servers: [ { url: "http://element-rest-test:8080" } ]
@@ -467,6 +532,15 @@ http:
     robak-game-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5176" } ]
+    racer-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:8450" } ]
+    racer-front-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5179" } ]
+    racer-game-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5180" } ]
     # Element (M8): panel 5273, board 5373, API 8449 — see the element docs.
     element-dev-svc:
       loadBalancer:
@@ -550,6 +624,14 @@ http:
         prefixes: [ "/dev/robak/app/" ]
     strip-robak-game-dev:
       stripPrefix: { prefixes: [ "/dev/robak/game" ] }
+    strip-racer:
+      stripPrefix:
+        prefixes: [ "/racer" ]
+    strip-racer-dev:
+      stripPrefix:
+        prefixes: [ "/dev/racer" ]
+    strip-racer-game-dev:
+      stripPrefix: { prefixes: [ "/dev/racer/game" ] }
     strip-element-dev:
       stripPrefix: { prefixes: [ "/dev" ] }
 
