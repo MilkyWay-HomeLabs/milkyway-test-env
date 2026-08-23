@@ -1,7 +1,7 @@
 # Adding an application (element, racer, puzzel)
 
-Each new application gets three containers — **rest**, **front**, **game** — one IP block,
-one database, one set of Traefik routes and one `env/` directory. This is the checklist.
+Each new application gets three containers — **rest**, **front**, **game** — one IP block, one database, one set of
+Traefik routes and one `env/` directory. This is the checklist.
 
 `docs/future/element-racer-puzzel.yml` holds ready-to-paste compose blocks for all three.
 
@@ -9,36 +9,34 @@ one database, one set of Traefik routes and one `env/` directory. This is the ch
 
 Some of the groundwork is done, which is easy to miss:
 
-| App | Database | User | Status |
-|---|---|---|---|
-| **element** | **PostgreSQL** `test_element` | `element` | **Done** — deployed. See the note below |
-| **racer** | MariaDB `test_racer` | `racer` | DB and user exist (`sql/mariadb/000_create_databases_and_users.sql`); password is `CHANGE_ME` and must be set |
-| **puzzel** | MongoDB `test_puzzel` | `puzzel` | DB, user and a `metadata` collection exist (`sql/mongo/000_init_puzzel.js`) |
+| App         | Database                      | User      | Status                                                                                                        |
+|-------------|-------------------------------|-----------|---------------------------------------------------------------------------------------------------------------|
+| **element** | **PostgreSQL** `test_element` | `element` | **Done** — deployed. See the note below                                                                       |
+| **racer**   | MariaDB `test_racer`          | `racer`   | DB and user exist (`sql/mariadb/000_create_databases_and_users.sql`); password is `CHANGE_ME` and must be set |
+| **puzzel**  | MongoDB `test_puzzel`         | `puzzel`  | DB, user and a `metadata` collection exist (`sql/mongo/000_init_puzzel.js`)                                   |
 
-**Element is deployed and is the exception to most of this page.** It chose PostgreSQL
-(its `D-002`), so the unused MariaDB `test_element` from
-`sql/mariadb/000_create_databases_and_users.sql` is a leftover, not the database it uses —
-the live one is in `sql/postgres/000_create_databases_and_users.sql`. And
-`element-rest-api` is a Spring Boot 4 fat jar on a plain JRE, not a WAR in the shared
-Tomcat image, so it has `jar/element-rest/` and `env/element/element-rest.env` where the
-blocks below assume `tomcat/app/*.war` and a `*.properties` in Tomcat's `conf/`. Read the
-`element-*-test` services in `docker-compose.yml` rather than the paste-ready block for a
-JVM app that ships a jar.
+**Element is deployed and is the exception to most of this page.** It chose PostgreSQL (its `D-002`), so the unused
+MariaDB `test_element` from
+`sql/mariadb/000_create_databases_and_users.sql` is a leftover, not the database it uses — the live one is in
+`sql/postgres/000_create_databases_and_users.sql`. And
+`element-rest-api` is a Spring Boot 4 fat jar on a plain JRE, not a WAR in the shared Tomcat image, so it has
+`jar/element-rest/` and `env/element/element-rest.env` where the blocks below assume `tomcat/app/*.war` and a
+`*.properties` in Tomcat's `conf/`. Read the
+`element-*-test` services in `docker-compose.yml` rather than the paste-ready block for a JVM app that ships a jar.
 
 All three are also already listed in `ALLOWED_APPS_HEADERS` in
-`env/tomcat/andromeda-authorization.properties` (`element_rest_api`, `racer_rest_api`).
-**Remove them.** Under the current architecture a REST API does not authenticate against
-Andromeda — it goes through Nebula. Leaving the header in place grants an access path the
-app is not supposed to have. Add `puzzel` there only if you find you need it, which you
+`env/tomcat/andromeda-authorization.properties` (`element_rest_api`, `racer_rest_api`). **Remove them.** Under the
+current architecture a REST API does not authenticate against Andromeda — it goes through Nebula. Leaving the header in
+place grants an access path the app is not supposed to have. Add `puzzel` there only if you find you need it, which you
 should not.
 
 ## Reserved addresses
 
-| App | Block | rest | front | game |
-|---|---|---|---|---|
+| App     | Block  | rest   | front  | game   |
+|---------|--------|--------|--------|--------|
 | element | `.150` | `.150` | `.151` | `.152` |
-| racer | `.160` | `.160` | `.161` | `.162` |
-| puzzel | `.170` | `.170` | `.171` | `.172` |
+| racer   | `.160` | `.160` | `.161` | `.162` |
+| puzzel  | `.170` | `.170` | `.171` | `.172` |
 
 Same last octet on every network the container joins.
 
@@ -49,18 +47,18 @@ Same last octet on every network the container joins.
 ```yaml
 <app>-rest-test:
   networks:
-    proxy:     { ipv4_address: 172.21.0.<base> }      # Traefik routes to it
-    internal:  { ipv4_address: 172.22.0.<base> }      # reaches its database
+    proxy: { ipv4_address: 172.21.0.<base> }      # Traefik routes to it
+    internal: { ipv4_address: 172.22.0.<base> }      # reaches its database
     # NO auth-net. The REST API authenticates through Nebula, never against
     # Andromeda directly. See docs/ARCHITECTURE.md.
 
 <app>-front-test:
   networks:
-    proxy:     { ipv4_address: 172.21.0.<base+1> }    # proxy ONLY
+    proxy: { ipv4_address: 172.21.0.<base+1> }    # proxy ONLY
 
 <app>-game-test:
   networks:
-    proxy:     { ipv4_address: 172.21.0.<base+2> }    # proxy ONLY
+    proxy: { ipv4_address: 172.21.0.<base+2> }    # proxy ONLY
 ```
 
 A front or game container on `internal` is a bug — it has no business reaching a database.
@@ -73,8 +71,8 @@ A front or game container on `internal` is a bug — it has no business reaching
 ALTER USER 'element'@'%' IDENTIFIED BY '<from the secrets master file>';
 ```
 
-and add the app's schema as `sql/mariadb/00N_<app>_model_and_data.sql`. Remember the SQL in
-this repo is public: keep `CHANGE_ME` placeholders in the committed file.
+and add the app's schema as `sql/mariadb/00N_<app>_model_and_data.sql`. Remember the SQL in this repo is public: keep
+`CHANGE_ME` placeholders in the committed file.
 
 **MongoDB** (puzzel) — already provisioned by `sql/mongo/000_init_puzzel.js`.
 
@@ -92,27 +90,25 @@ Record the new passwords in the secrets master file (path in `docs/SECRETS.md`).
 
 ### 4. Traefik routes
 
-In `traefik/config/dynamic.yml`, add three routers and three services following the
-established path scheme:
+In `traefik/config/dynamic.yml`, add three routers and three services following the established path scheme:
 
-| Path | Goes to |
-|---|---|
-| `/<app>/api` | `<app>-rest-test:8080` — with a `strip-<app>` middleware |
-| `/<app>/app/` | `<app>-front-test:80` — **no strip** if the bundle is built with that base path |
-| `/<app>/game/` | `<app>-game-test:80` |
+| Path           | Goes to                                                                         |
+|----------------|---------------------------------------------------------------------------------|
+| `/<app>/api`   | `<app>-rest-test:8080` — with a `strip-<app>` middleware                        |
+| `/<app>/app/`  | `<app>-front-test:80` — **no strip** if the bundle is built with that base path |
+| `/<app>/game/` | `<app>-game-test:80`                                                            |
 
-Whether to strip the prefix depends on how the front-end bundle was built. If it was built
-with base `/<app>/app/` and its nginx serves that path, stripping hands nginx a bare `/`
+Whether to strip the prefix depends on how the front-end bundle was built. If it was built with base `/<app>/app/` and
+its nginx serves that path, stripping hands nginx a bare `/`
 and earns a 404. Chess and Robak differ here — read their comments before copying.
 
-`dynamic.yml` is **hot-reloaded** (`watch: true`). A syntax error or a hostname that does
-not resolve takes effect immediately. Add the compose service and start it *before* adding
-its route.
+`dynamic.yml` is **hot-reloaded** (`watch: true`). A syntax error or a hostname that does not resolve takes effect
+immediately. Add the compose service and start it *before* adding its route.
 
 ### 5. Monitoring
 
-Add a scrape job in `prometheus/prometheus.yml`. The target must be on `internal` —
-Prometheus lives there and cannot see `proxy`-only containers, which is why the `front`
+Add a scrape job in `prometheus/prometheus.yml`. The target must be on `internal` — Prometheus lives there and cannot
+see `proxy`-only containers, which is why the `front`
 and `game` containers are not scraped.
 
 ### 6. Verify
