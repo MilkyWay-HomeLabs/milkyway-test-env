@@ -43,6 +43,9 @@ resources/
 # ==========================================================================
 **/dist/
 tomcat/app/*.war
+# Spring Boot fat jars (element-rest-test). ~64 MB each — well past GitHub's limit.
+jar/*/*.jar
+jar/*/archive/
 tomcat/archive/
 kestrel/**/bin/
 kestrel/**/obj/

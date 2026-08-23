@@ -287,7 +287,9 @@ resource "helm_release" "traefik" {
       }
     }
     service = {
-      type = "NodePort"
+      spec = {
+        type = "NodePort"
+      }
     }
     ports = {
       web = {
@@ -295,9 +297,6 @@ resource "helm_release" "traefik" {
       }
       websecure = {
         nodePort = 30443
-        tls = {
-          enabled = true
-        }
       }
     }
     ingressRoute = {

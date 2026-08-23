@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2026-07-25
+
+Element deployed: the first application here that ships a fat jar instead of a WAR, and
+the first on PostgreSQL.
+
+### Added
+- **`element-rest-test`** (172.21.0.150 / 172.22.0.150) — `element-rest-api` as a Spring
+  Boot 4 fat jar on `eclipse-temurin:25-jre`, deployed from the new `jar/element-rest/`
+  slot. Not on `auth-net`: it validates the platform cookie locally against the shared
+  HS256 secret and never calls the authorization server.
+- **`element-front-test`** (.151) and **`element-game-test`** (.152) — static Vite bundles
+  on stock nginx, from `nginx/element-front/` and `nginx/element-game/`.
+- Traefik routers for `/element/api`, `/element/app/` and `/element/game/`. The API route
+  is the only one with **no** `strip` middleware: the app runs with context path
+  `/element/api` and expects to see the prefix it is reached by.
+- PostgreSQL `test_element` owned by `element`, with backup-user grants on tables **and
+  sequences** (`sql/postgres/000_create_databases_and_users.sql`). 37 tables are built by
+  Flyway on first start of the API.
+- `env/element/element-rest.env.example`; `jar/element-rest/README.md` documenting the
+  deploy and the missing-jar restart-loop trap.
+
+### Changed
+- `.gitignore` ignores `jar/*/*.jar` — a Boot fat jar is ~64 MB, well past GitHub's limit.
+- `element_rest_api` removed from `ALLOWED_APPS_HEADERS` in Andromeda's properties: a REST
+  API authenticates through Nebula. **Takes effect on Andromeda's next restart.**
+
+### Fixed
+- The backup user could not read sequences, so the first `pg_dump` of `test_element`
+  produced a **0-byte** file with `SELECT` on all 37 tables already granted. `pg_dump`
+  reads every sequence's `last_value` and fails there before writing anything. See
+  `docs/STATUS.md` bug 8.
+- The segmentation check in `docs/future/ADDING-AN-APP.md` asserted something untrue — that
+  a REST API off `auth-net` cannot reach `andromeda-auth-test:8080`. It can, over
+  `internal`. Replaced with a network-membership check. The `auth-net` claim in the 2.0.0
+  entry below is likewise too strong: what that network enforces is that Andromeda has no
+  route from `proxy`. See `docs/STATUS.md` bug 7.
+
 ## [2.0.0] - 2026-07-14
 
 Merged this repository with the deployed environment at

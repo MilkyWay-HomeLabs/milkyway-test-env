@@ -41,6 +41,78 @@ http:
       middlewares: [ "strip-resources" ]
       tls: { }
 
+    # --- HUB (TEST) ---
+    #
+    # `/hub/app/` is not stripped: the bundle is built with that base
+    # (frontend/vite.config.ts in the hub repository) and nginx serves that very path, so
+    # stripping would hand nginx a bare "/" and earn a 404 — the same rule as
+    # robak-front-test and element-front-test.
+    #
+    # `/hub/api` *is* stripped, and that is the one asymmetry in this block. The backend
+    # runs with root_path="/hub", so it routes on /api/v1/... and still writes /hub into
+    # the OpenAPI document's server URL. Strip and root_path are two halves of one
+    # decision: remove either and the interactive docs generate a client that calls the
+    # wrong URL.
+    hub-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hub/app/`)"
+      entryPoints: [ "https" ]
+      service: "hub-front-test-svc"
+      priority: 100
+      tls: { }
+
+    hub-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/hub/api`)"
+      entryPoints: [ "https" ]
+      service: "hub-rest-test-svc"
+      middlewares: [ "strip-hub" ]
+      priority: 150
+      tls: { }
+
+    # FastAPI serves the interactive docs and the schema off the application root, so they
+    # arrive on the same service through the same strip. Separate from the API router
+    # because they are separate paths, not because they are configured differently.
+    hub-docs-test:
+      rule: "Host(`milkyway.test`) && (PathPrefix(`/hub/docs`) || PathPrefix(`/hub/openapi.json`))"
+      entryPoints: [ "https" ]
+      service: "hub-rest-test-svc"
+      middlewares: [ "strip-hub" ]
+      tls: { }
+
+    # --- ELEMENT APP (TEST) ---
+    # No strip anywhere in this block, which makes it the odd one out.
+    #
+    # The two nginx routers are the usual case: both bundles are built with a base
+    # of /element/app/ and /element/game/ and their nginx.conf serves those paths,
+    # so stripping would hand nginx a bare "/" and earn a 404.
+    #
+    # The API is the unusual one. element-rest-api runs with the context path
+    # /element/api (application.yml), so it expects to see the prefix it is
+    # reached by — unlike Robak and Chess, which are deployed at the container
+    # root and therefore need strip-<app>. Adding a strip here would hand it
+    # /v1/... and earn a 404 on every call.
+    element-game-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/game/`)"
+      entryPoints: [ "https" ]
+      service: "element-game-test-svc"
+      tls: { }
+
+    element-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/app/`)"
+      entryPoints: [ "https" ]
+      service: "element-front-test-svc"
+      priority: 100
+      tls: { }
+
+    # The curated contract at openapi/openapi.yaml is the source of truth and the
+    # UI is pointed at it, so both live under the API's own context path — no
+    # separate swagger router is needed the way Robak has one.
+    element-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/api`)"
+      entryPoints: [ "https" ]
+      service: "element-test-svc"
+      priority: 150
+      tls: { }
+
     # --- ROBAK APP (TEST) ---
     # No strip on the two nginx routers: both bundles are built with a base of
     # /robak/app/ and /robak/game/, and their nginx.conf serves those very paths.
@@ -200,6 +272,42 @@ http:
       middlewares: [ "strip-robak-dev" ]
       tls: { }
 
+    element-front-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/element/app`)"
+      entryPoints: [ "https" ]
+      service: "element-front-dev-svc"
+      tls: { }
+
+    element-game-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/element/game`)"
+      entryPoints: [ "https" ]
+      service: "element-game-dev-svc"
+      tls: { }
+
+    # Only /dev is stripped: element-rest-api runs with the context path
+    # /element/api, so the app expects to see it. Stripping /dev/element as the
+    # other APIs do would hand it /api/... and earn a 404 on every call.
+    element-api-dev:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/dev/element/api`)"
+      entryPoints: [ "https" ]
+      service: "element-dev-svc"
+      middlewares: [ "strip-element-dev" ]
+      tls: { }
+
+    # Vite's HMR socket lives at the host root, so the two dev servers are given
+    # distinct paths rather than fighting over one /@vite-hmr.
+    element-front-hmr-dev:
+      rule: "Host(`milkyway.test`) && Path(`/@vite-hmr-element-app`)"
+      entryPoints: [ "https" ]
+      service: "element-front-dev-svc"
+      tls: { }
+
+    element-game-hmr-dev:
+      rule: "Host(`milkyway.test`) && Path(`/@vite-hmr-element-game`)"
+      entryPoints: [ "https" ]
+      service: "element-game-dev-svc"
+      tls: { }
+
     chess-game-dev:
       rule: "Host(`milkyway.test`) && PathPrefix(`/dev/chess/game/`)"
       entryPoints: [ "https" ]
@@ -304,6 +412,21 @@ http:
     robak-front-test-svc:
       loadBalancer:
         servers: [ { url: "http://robak-front-test:80" } ]
+    element-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-rest-test:8080" } ]
+    element-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-front-test:80" } ]
+    element-game-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-game-test:80" } ]
+    hub-rest-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hub-rest-test:8000" } ]
+    hub-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://hub-front-test:80" } ]
 
     # Dev endpoints
     andromeda-dev-svc:
@@ -344,6 +467,16 @@ http:
     robak-game-dev-svc:
       loadBalancer:
         servers: [ { url: "http://host.docker.internal:5176" } ]
+    # Element (M8): panel 5273, board 5373, API 8449 — see the element docs.
+    element-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:8449" } ]
+    element-front-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5273" } ]
+    element-game-dev-svc:
+      loadBalancer:
+        servers: [ { url: "http://host.docker.internal:5373" } ]
 
   middlewares:
     #    strip-traefik:
@@ -352,6 +485,11 @@ http:
     strip-resources:
       stripPrefix:
         prefixes: [ "/resources" ]
+    # One prefix, not two. `/hub/api` and `/hub/docs` both lose exactly `/hub`, which is
+    # what the backend's root_path expects to have been removed.
+    strip-hub:
+      stripPrefix:
+        prefixes: [ "/hub" ]
     strip-andromeda:
       stripPrefix:
         prefixes: [ "/andromeda" ]
@@ -412,6 +550,8 @@ http:
         prefixes: [ "/dev/robak/app/" ]
     strip-robak-game-dev:
       stripPrefix: { prefixes: [ "/dev/robak/game" ] }
+    strip-element-dev:
+      stripPrefix: { prefixes: [ "/dev" ] }
 
   serversTransports:
     dev-insecure:

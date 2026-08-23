@@ -454,11 +454,155 @@ services:
       proxy:
         ipv4_address: 172.21.0.142
 
+  # --- ELEMENT (rest + front + game) ---
+  #
+  # element-rest-api is a Spring Boot 4 fat jar on a plain JRE, not a WAR in the
+  # shared Tomcat image every older API uses. That is why this block does not look
+  # like the one in docs/future/element-racer-puzzel.yml:
+  #   jar/element-rest/           instead of tomcat/app/*.war
+  #   env/element/element-rest.env  instead of a *.properties in Tomcat's conf/
+  # It also runs on PostgreSQL, not the MariaDB that file assumed (Element D-002).
+  #
+  # JAVA_OPTS is a Tomcat convention and `java -jar` ignores it, so the heap flags
+  # are in the command itself.
+  element-rest-test:
+    image: eclipse-temurin:25-jre
+    container_name: element-rest-test
+    restart: unless-stopped
+    depends_on:
+      - postgres-test
+    command: [ "java", "-Xms512m", "-Xmx1g", "-jar", "/app/element-rest-api.jar" ]
+    env_file:
+      - env/element/element-rest.env
+    volumes:
+      - ./jar/element-rest/element-rest-api.jar:/app/element-rest-api.jar:ro
+      - ../../../resources/test:/app/fileserver
+    networks:
+      # NO auth-net: the accessToken cookie is validated locally against the
+      # shared HS256 secret, so this API never reaches the authorization server.
+      proxy:
+        ipv4_address: 172.21.0.150
+      internal:
+        ipv4_address: 172.22.0.150
+    extra_hosts:
+      - "milkyway.test:172.21.0.2"
+
+  # The panel and the board are both static Vite bundles served by stock nginx.
+  # nginx.conf is a full config (events/http), so it mounts at /etc/nginx/nginx.conf —
+  # anywhere else and nginx silently runs its default config, with no SPA fallback.
+  # Both bundles are built with their own base path, so Traefik does not strip it.
+  element-front-test:
+    image: nginx:alpine
+    container_name: element-front-test
+    restart: unless-stopped
+    volumes:
+      - ./nginx/element-front/dist:/usr/share/nginx/html/element/app:ro
+      - ./nginx/element-front/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.151
+
+  element-game-test:
+    image: nginx:alpine
+    container_name: element-game-test
+    restart: unless-stopped
+    volumes:
+      - ./nginx/element-game/dist:/usr/share/nginx/html/element/game:ro
+      - ./nginx/element-game/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.152
+
   # --- FUTURE APPS ---
-  # element (.150), racer (.160), puzzel (.170) each get rest + front + game.
-  # MariaDB already holds test_element and test_racer; MongoDB already holds
-  # test_puzzel. See docs/future/ADDING-AN-APP.md for the full checklist and
+  # racer (.160) and puzzel (.170) each get rest + front + game.
+  # MariaDB already holds test_racer; MongoDB already holds test_puzzel. See
+  # docs/future/ADDING-AN-APP.md for the full checklist and
   # docs/future/element-racer-puzzel.yml for ready-to-paste service blocks.
+
+  # --- HUB (rest + front) ---
+  #
+  # MilkyWayHub, the system of record for this lab: environments, databases, applications
+  # and the work queued against each. Read-only against everything it observes (CON-5).
+  # It takes the next free application block, .180, after puzzel .170 — rest = base+0,
+  # front = base+1; a hub-game-test would be .182 and will not exist.
+  #
+  # Unlike every other application here, both images are built from source in another
+  # repository rather than from a jar, a war or a dist/ dropped into this one. `image:`
+  # names what the build produces so that `docker compose up` without `--build` runs the
+  # last thing built rather than trying to pull a tag that was never pushed anywhere.
+  # Source, and the four fragments this block came from: repo/dev/milkyway-hub/deploy/.
+  hub-rest-test:
+    build:
+      context: ../../../repo/dev/milkyway-hub/backend
+    image: milkyway/hub-rest-test:local
+    container_name: hub-rest-test
+    restart: unless-stopped
+    env_file:
+      - env/hub/hub.env
+    volumes:
+      # A named volume, not a bind mount: it survives container recreation and image
+      # rebuild, and the only copy of the inventory never sits in a working tree where an
+      # accidental `git add` would publish every endpoint in the lab.
+      - hub-data:/data
+      # Read-only, and not a formality — it is what makes "the Hub never writes to
+      # anything" true regardless of what the code does. Both mounts are here although the
+      # Git probe that reads them is v0.4: adding a mount later means recreating a running
+      # container, and the mounts cost nothing empty.
+      - /home/wolf/MilkyWayHomeLab/repo:/repos:ro
+      - /home/wolf/MilkyWayHomeLab/infrastructure/docker/test:/envs/test:ro
+      # prod's *checkout*, not prod: a directory on this host, :ro like the other two.
+      # The seed watches every repository with a local_path and milkyway-prod-env is one,
+      # so without this mount that target is stale for ever and /health says degraded for
+      # a reason nobody can fix from the Hub.
+      - /home/wolf/MilkyWayHomeLab/infrastructure/docker/prod:/envs/prod:ro
+    networks:
+      # NO auth-net. The Hub is not part of the authorization path and must never be —
+      # it is an index of the lab, not a participant in it.
+      #
+      # `internal` carries no traffic yet; it is what the Docker and Prometheus probes
+      # need to reach prometheus-test and docker-proxy-test, and joining it now costs
+      # nothing while joining it later costs a recreate.
+      proxy:
+        ipv4_address: 172.21.0.180
+      internal:
+        ipv4_address: 172.22.0.180
+
+  hub-front-test:
+    build:
+      # The repository root, not frontend/ — the image also copies deploy/nginx.conf.
+      # That is why this front end mounts no nginx.conf from nginx/, unlike every other
+      # one here: it is baked into the image.
+      context: ../../../repo/dev/milkyway-hub
+      dockerfile: frontend/Dockerfile
+    image: milkyway/hub-front-test:local
+    container_name: hub-front-test
+    restart: unless-stopped
+    networks:
+      # proxy only, like every other front end here. A front end on `internal` is a bug:
+      # it has no business reaching a database.
+      proxy:
+        ipv4_address: 172.21.0.181
+
+  # docker-proxy-test is infrastructure, not part of the Hub — a read-only view of the
+  # Docker API any future tool can use, named <component>-test exactly like
+  # node-exporter-test. Its first consumer is the Hub's Docker probe (v0.5, FR-6.2).
+  #
+  # It takes .10, continuing the infrastructure range into the unallocated .10-.19 because
+  # .3-.9 is full. docs/ARCHITECTURE.md says so as of 2026-08-09.
+  docker-proxy-test:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    container_name: docker-proxy-test
+    restart: unless-stopped
+    environment:
+      # CONTAINERS=1 and nothing else: no POST, no exec, no images, no volumes. Nothing in
+      # this environment is allowed to write to the daemon, and this is what enforces it
+      # rather than what asks for it.
+      CONTAINERS: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      internal:                # internal only — it is never routed by Traefik
+        ipv4_address: 172.22.0.10
 
 volumes:
   prometheus-data:
@@ -474,6 +618,9 @@ volumes:
   postgres-data:
     driver: local
   mongo-data:
+    driver: local
+  # The Hub's SQLite database and its nightly backups, at /data in hub-rest-test.
+  hub-data:
     driver: local
 
 networks:
