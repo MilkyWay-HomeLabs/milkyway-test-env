@@ -113,6 +113,26 @@ http:
       priority: 150
       tls: { }
 
+    # --- ELEMENT-EDITOR (TEST) ---
+    # A separate tool from the element-* trio above (docs/element-editor); no strip on
+    # either router, same reasoning as Element's own: the front bundle is built with base
+    # /element/editor/app/ and nginx serves that path, and the backend mounts everything
+    # under its own context path /element/editor/api (matching element-rest-api's
+    # convention), so it expects to see the prefix it is reached by.
+    element-editor-front-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/editor/app/`)"
+      entryPoints: [ "https" ]
+      service: "element-editor-front-test-svc"
+      priority: 100
+      tls: { }
+
+    element-editor-api-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/editor/api`)"
+      entryPoints: [ "https" ]
+      service: "element-editor-test-svc"
+      priority: 150
+      tls: { }
+
     # --- ROBAK APP (TEST) ---
     # No strip on the two nginx routers: both bundles are built with a base of
     # /robak/app/ and /robak/game/, and their nginx.conf serves those very paths.
@@ -486,6 +506,12 @@ http:
     element-game-test-svc:
       loadBalancer:
         servers: [ { url: "http://element-game-test:80" } ]
+    element-editor-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-editor-rest-test:8080" } ]
+    element-editor-front-test-svc:
+      loadBalancer:
+        servers: [ { url: "http://element-editor-front-test:80" } ]
     hub-rest-test-svc:
       loadBalancer:
         servers: [ { url: "http://hub-rest-test:8000" } ]
