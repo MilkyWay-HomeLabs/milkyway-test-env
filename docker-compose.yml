@@ -513,6 +513,56 @@ services:
       proxy:
         ipv4_address: 172.21.0.152
 
+  # --- ELEMENT-EDITOR (rest + front) ---
+  #
+  # A card art/layout generator for Element (docs/element-editor), a separate tool from
+  # the element-* trio above — its own repo, its own IP block (.190, next free after Hub's
+  # .180), test-environment only, never deployed to prod. No database and no game
+  # container: the backend proxies element-rest-api's public catalogue and writes
+  # generated art to a bind-mounted volume; the frontend is a static Vite bundle like
+  # every other panel here.
+  #
+  # The backend is a plain Node/TS/Express app (this lab's first — everywhere else is
+  # Spring Boot), so it runs the same way element-rest-test's jar does: a generic runtime
+  # image plus a bind-mounted build, not a custom Dockerfile. `scripts/deploy-element-editor.sh`
+  # builds dist/ + node_modules into node/element-editor-rest/current and swaps it in the
+  # same atomic way jar/element-rest/ does.
+  #
+  # On `internal` to reach element-rest-test directly by container name rather than round-
+  # tripping through the public HTTPS route — see ELEMENT_API_URL in
+  # env/element-editor/element-editor-rest.env. NO auth-net: this tool never authenticates
+  # against anything: the catalogue it reads is public (element-rest-api PR #22) and it
+  # has no login flow of its own.
+  element-editor-rest-test:
+    image: node:22-slim
+    container_name: element-editor-rest-test
+    restart: unless-stopped
+    depends_on:
+      - element-rest-test
+    command: [ "node", "dist/server.js" ]
+    working_dir: /app
+    env_file:
+      - env/element-editor/element-editor-rest.env
+    volumes:
+      - ./node/element-editor-rest/current:/app:ro
+      - ../../../resources/test/element-editor:/app/output
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.190
+      internal:
+        ipv4_address: 172.22.0.190
+
+  element-editor-front-test:
+    image: nginx:alpine
+    container_name: element-editor-front-test
+    restart: unless-stopped
+    volumes:
+      - ./nginx/element-editor-front/dist:/usr/share/nginx/html/element/editor/app:ro
+      - ./nginx/element-editor-front/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.191
+
   # --- RACER (rest + front + game) ---
   # All three are commented out: none of racer-rest-api's WAR, racer-front's dist or
   # racer-game's dist exist on disk yet. Docker would create a directory where each file

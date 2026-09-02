@@ -46,6 +46,10 @@ tomcat/app/*.war
 # Spring Boot fat jars (element-rest-test). ~64 MB each — well past GitHub's limit.
 jar/*/*.jar
 jar/*/archive/
+# Node backend build slot (element-editor-rest) — dist/ and node_modules/ are
+# already covered above; this also catches the copied package.json.
+node/*/current/
+node/*/archive/
 tomcat/archive/
 kestrel/**/bin/
 kestrel/**/obj/

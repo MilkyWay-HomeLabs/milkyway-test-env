@@ -109,7 +109,7 @@ network you are looking at.
 | `.2` | `traefik-test` |
 | `.3` – `.19` | infrastructure — prometheus `.3`, grafana `.4`, node-exporter `.5`, loki `.6`, promtail `.7`, fileserver `.8`, backup `.9`, docker-proxy `.10` |
 | `.30` – `.39` | databases — mariadb `.31`, postgres `.32`, mongo `.33` |
-| `.100` – `.179` | applications, one 10-address block each |
+| `.100` – `.199` | applications, one 10-address block each |
 
 Inside an application block: **rest = base+0, front = base+1, game = base+2**, leaving
 seven spare for whatever an app grows.
@@ -124,8 +124,10 @@ seven spare for whatever an app grows.
 | **element** | `.150` | `.150` | `.151` | `.152` |
 | **racer** | `.160` | `.160` | `.161` | `.162` |
 | **puzzel** | `.170` | `.170` | `.171` | `.172` |
+| hub | `.180` | `.180` | `.181` | — *(no game)* |
+| element-editor | `.190` | `.190` | `.191` | — *(no game; a separate tool from `element`, not an eighth app-block sibling)* |
 
-The last three are reserved, not yet deployed. See `docs/future/ADDING-AN-APP.md`.
+Puzzel is reserved, not yet deployed. See `docs/future/ADDING-AN-APP.md`.
 
 ## Current deviations
 
