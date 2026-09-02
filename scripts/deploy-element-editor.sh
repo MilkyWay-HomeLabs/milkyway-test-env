@@ -65,6 +65,11 @@ deploy_api() {
   local build_dir="$slot/.new"
   rm -rf "$build_dir"
   mkdir -p "$build_dir"
+  # /app is a read-only bind mount, and Docker cannot create a missing
+  # mountpoint directory inside a read-only mount at container start — so
+  # /app/output (the separate, writable bind mount for OUTPUT_DIR) must
+  # already exist in the slot before the container is created.
+  mkdir -p "$build_dir/output"
   cp -r "$backend/dist" "$build_dir/dist"
   cp -r "$backend/node_modules" "$build_dir/node_modules"
   cp "$backend/package.json" "$build_dir/package.json"
@@ -103,7 +108,12 @@ deploy_front() {
   cp -r "$front/dist/." "$slot/"
 
   # dist is a read-only bind mount, so nginx serves the new files immediately —
-  # no container restart, which is why it is not touched here.
+  # no recreate needed for a redeploy. `up -d` (no --force-recreate) is the
+  # first-deploy path: harmless no-op if the container is already running,
+  # creates and starts it if this is the very first deploy — found by hand
+  # the first time this script ran, when there was nothing yet to serve the
+  # freshly-swapped files and the route answered 502.
+  (cd "$here" && docker compose -p test up -d --no-deps element-editor-front-test)
   verify "$BASE_URL/element/editor/app/"
 }
 
