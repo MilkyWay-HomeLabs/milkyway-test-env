@@ -282,6 +282,18 @@ services:
       proxy:
         ipv4_address: 172.21.0.111
 
+  nebula-front-exporter-test:
+    image: nginx/nginx-prometheus-exporter:1.4.1
+    container_name: nebula-front-exporter-test
+    restart: unless-stopped
+    command:
+      - '-nginx.scrape-uri=http://nebula-front-test:80/nginx_status'
+    networks:
+      proxy:
+        ipv4_address: 172.21.0.11
+      internal:
+        ipv4_address: 172.22.0.11
+
   # --- CHESS (rest + front + game) ---
 
   chess-rest-test:

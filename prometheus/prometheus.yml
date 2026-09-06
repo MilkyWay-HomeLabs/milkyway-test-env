@@ -20,6 +20,15 @@ scrape_configs:
     static_configs:
       - targets: [ 'andromeda-auth-test:8080' ]
 
+  - job_name: 'nebula-rest'
+    metrics_path: /api/actuator/prometheus
+    static_configs:
+      - targets: [ 'nebula-rest-test:8080' ]
+
+  - job_name: 'nebula-front'
+    static_configs:
+      - targets: [ 'nebula-front-exporter-test:9113' ]
+
   - job_name: 'hacman-rest'
     static_configs:
       - targets: [ 'hacman-rest-test:8080' ]

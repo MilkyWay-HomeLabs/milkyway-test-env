@@ -104,13 +104,26 @@ http:
       tls: { }
 
     # The curated contract at openapi/openapi.yaml is the source of truth and the
-    # UI is pointed at it, so both live under the API's own context path — no
-    # separate swagger router is needed the way Robak has one.
+    # UI is pointed at it, so both live under the API's own context path:
+    # https://milkyway.test/element/api/swagger/index.html (see README.md /
+    # design/api.md — this is the documented URL, not the platform-wide
+    # /<app>/swagger-ui/... convention Robak/Racer/Chess/Nebula use).
     element-api-test:
       rule: "Host(`milkyway.test`) && PathPrefix(`/element/api`)"
       entryPoints: [ "https" ]
       service: "element-test-svc"
       priority: 150
+      tls: { }
+
+    # Alias so the platform-wide /element/swagger-ui/... URL also works, matching
+    # the pattern every other app uses. Rewritten (not stripped) because the app's
+    # actual swagger-ui.path is customized to /swagger/index.html (application.yml),
+    # which springdoc serves from the nested resource path /swagger/swagger-ui/**.
+    element-swagger-alias-test:
+      rule: "Host(`milkyway.test`) && PathPrefix(`/element/swagger-ui`)"
+      entryPoints: [ "https" ]
+      service: "element-test-svc"
+      middlewares: [ "element-swagger-alias" ]
       tls: { }
 
     # --- ELEMENT-EDITOR (TEST) ---
@@ -660,6 +673,12 @@ http:
       stripPrefix: { prefixes: [ "/dev/racer/game" ] }
     strip-element-dev:
       stripPrefix: { prefixes: [ "/dev" ] }
+    # Rewrite (not a plain strip): /element/swagger-ui/foo -> /element/api/swagger/swagger-ui/foo.
+    # See element-swagger-alias-test above.
+    element-swagger-alias:
+      replacePathRegex:
+        regex: "^/element/swagger-ui/?(.*)"
+        replacement: "/element/api/swagger/swagger-ui/$1"
 
   serversTransports:
     dev-insecure:
